@@ -1,127 +1,113 @@
 # Tasks: [FEATURE NAME]
 
-**Input**: Design documents from `/specs/[###-feature-name]/`
-**Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
+**Input**: Design documents from `/specs/[###-feature-name]/`  
+**Prerequisites**: `plan.md` (required); optional: `research.md`, `data-model.md`, `contracts/`
+
+---
+
+## Module API Matrix (global contracts)
+> Define the **public surface** for each module. Keep it concise and normative.
+module: repo
+public:
+
+get_user(user_id) -> User
+
+save_user(user: User) -> None
+
+module: auth
+public:
+
+issue_token(user_id) -> Token
+
+verify_token(token) -> UserId | Error
+
+## Global Tasks by Module (high-level only)
+> Tag each with `@module(<name>)` and priority `@prio(P1|P2|P3)`. Do **not** include file-level details here.
+- [ ] T001 @module(repo) @prio(P1) Add `get_user(user_id)` to repo public surface
+- [ ] T002 @module(auth) @prio(P1) Expose `issue_token` and `verify_token` with stable contracts
+- [ ] T003 @module(api)  @prio(P2) Wire `/api/users/{id}` to repo.get_user
+
+---
 
 ## Execution Flow (main)
-```
-1. Load plan.md from feature directory
-   → If not found: ERROR "No implementation plan found"
-   → Extract: tech stack, libraries, structure
-2. Load optional design documents:
-   → data-model.md: Extract entities → model tasks
-   → contracts/: Each file → contract test task
-   → research.md: Extract decisions → setup tasks
-3. Generate tasks by category:
-   → Setup: project init, dependencies, linting
-   → Tests: contract tests, integration tests
-   → Core: models, services, CLI commands
-   → Integration: DB, middleware, logging
-   → Polish: unit tests, performance, docs
-4. Apply task rules:
-   → Different files = mark [P] for parallel
-   → Same file = sequential (no [P])
-   → Tests before implementation (TDD)
-5. Number tasks sequentially (T001, T002...)
-6. Generate dependency graph
-7. Create parallel execution examples
-8. Validate task completeness:
-   → All contracts have tests?
-   → All entities have models?
-   → All endpoints implemented?
-9. Return: SUCCESS (tasks ready for execution)
-```
+Load plan.md from the feature directory
+→ If not found: ERROR "No implementation plan found"
+→ Extract: tech stack, libraries, structure
+
+Load optional design docs:
+→ data-model.md: Extract entities → model tasks
+→ contracts/: Each file → contract test task
+→ research.md: Extract decisions → setup tasks
+
+Generate preliminary tasks (GLOBAL scope):
+→ Setup (thin): env, baseline CI hooks
+→ Tests (thin): global acceptance checks, mappings to modules
+→ Core & Integration: ONLY high-level items tagged by @module(...)
+→ Polish (thin): docs stubs
+
+Apply task rules:
+→ Different files = mark [P] for parallel (later resolved in module tasks)
+→ Same file = sequential (no [P])
+→ Tests before implementation (TDD is mandatory everywhere)
+
+Number tasks sequentially (T001, T002...)
+
+Build dependency notes (high-level), but defer file paths to module tasks
+
+Create fan-out plan: group tasks by @module(...)
+
+Validate completeness:
+→ Are all public APIs in "Module API Matrix" covered by tasks?
+→ Are contracts mapped to modules?
+→ Are global tasks free of file-level details?
+
+Return: SUCCESS (global tasks ready for fan-out)
 
 ## Format: `[ID] [P?] Description`
-- **[P]**: Can run in parallel (different files, no dependencies)
-- Include exact file paths in descriptions
+- Keep high-level descriptions here; **no exact file paths**.
+- Add tags: `@module(<name>)`, `@prio(P1|P2|P3)`, optional `@owner(@anton)`
+- File paths and granular steps belong to **module task files**.
 
-## Path Conventions
+## Path Conventions (informative)
 - **Single project**: `src/`, `tests/` at repository root
 - **Web app**: `backend/src/`, `frontend/src/`
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+- Module task writers MUST adjust to `plan.md` structure.
 
-## Phase 3.1: Setup
-- [ ] T001 Create project structure per implementation plan
-- [ ] T002 Initialize [language] project with [framework] dependencies
-- [ ] T003 [P] Configure linting and formatting tools
+## Phase 3.1: Setup (thin, global)
+- [ ] T010 Create/verify base project structure per implementation plan
+- [ ] T011 Initialize language/runtime, CI stub, and shared linting
+- [ ] T012 [P] Configure formatting & commit hooks
 
-## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
-**CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
-- [ ] T004 [P] Contract test POST /api/users in tests/contract/test_users_post.py
-- [ ] T005 [P] Contract test GET /api/users/{id} in tests/contract/test_users_get.py
-- [ ] T006 [P] Integration test user registration in tests/integration/test_registration.py
-- [ ] T007 [P] Integration test auth flow in tests/integration/test_auth.py
+## Phase 3.2: Tests First (TDD) — global acceptance framing
+> These are **global** placeholders; actual test files are generated in module tasks.
+- [ ] T020 Define contract coverage table (contracts/ → module mapping)
+- [ ] T021 Define integration flows (user registration, auth) mapped to modules
 
-## Phase 3.3: Core Implementation (ONLY after tests are failing)
-- [ ] T008 [P] User model in src/models/user.py
-- [ ] T009 [P] UserService CRUD in src/services/user_service.py
-- [ ] T010 [P] CLI --create-user in src/cli/user_commands.py
-- [ ] T011 POST /api/users endpoint
-- [ ] T012 GET /api/users/{id} endpoint
-- [ ] T013 Input validation
-- [ ] T014 Error handling and logging
+## Phase 3.3: Core (high-level only)
+- [ ] T030 @module(repo) Provide user retrieval capability
+- [ ] T031 @module(auth) Provide token issuing/verification capability
+- [ ] T032 @module(api) Expose `GET /api/users/{id}`
 
-## Phase 3.4: Integration
-- [ ] T015 Connect UserService to DB
-- [ ] T016 Auth middleware
-- [ ] T017 Request/response logging
-- [ ] T018 CORS and security headers
+## Phase 3.4: Integration (high-level only)
+- [ ] T040 Cross-module wiring (API → service → repo)
+- [ ] T041 Logging and cross-cutting concerns enumerated by module
 
-## Phase 3.5: Polish
-- [ ] T019 [P] Unit tests for validation in tests/unit/test_validation.py
-- [ ] T020 Performance tests (<200ms)
-- [ ] T021 [P] Update docs/api.md
-- [ ] T022 Remove duplication
-- [ ] T023 Run manual-testing.md
+## Phase 3.5: Polish (global)
+- [ ] T050 Definition-of-Done checklist updated
+- [ ] T051 Update `docs/` index for feature
 
-## Dependencies
-- Tests (T004-T007) before implementation (T008-T014)
-- T008 blocks T009, T015
-- T016 blocks T018
-- Implementation before polish (T019-T023)
+## Fan-out Rules (to module tasks)
+- Each `@module(<name>)` item spawns a module task file `{{module}}-tasks.md`
+- Module tasks:
+  - expand into file-level steps with exact paths
+  - enforce TDD (tests must fail first)
+  - load constitutions: global + `<module>.constitution.md`
+  - respect module boundaries and only touch allowed directories
 
-## Parallel Example
-```
-# Launch T004-T007 together:
-Task: "Contract test POST /api/users in tests/contract/test_users_post.py"
-Task: "Contract test GET /api/users/{id} in tests/contract/test_users_get.py"
-Task: "Integration test registration in tests/integration/test_registration.py"
-Task: "Integration test auth in tests/integration/test_auth.py"
-```
-
-## Notes
-- [P] tasks = different files, no dependencies
-- Verify tests fail before implementing
-- Commit after each task
-- Avoid: vague tasks, same file conflicts
-
-## Task Generation Rules
-*Applied during main() execution*
-
-1. **From Contracts**:
-   - Each contract file → contract test task [P]
-   - Each endpoint → implementation task
-   
-2. **From Data Model**:
-   - Each entity → model creation task [P]
-   - Relationships → service layer tasks
-   
-3. **From User Stories**:
-   - Each story → integration test [P]
-   - Quickstart scenarios → validation tasks
-
-4. **Ordering**:
-   - Setup → Tests → Models → Services → Endpoints → Polish
-   - Dependencies block parallel execution
-
-## Validation Checklist
-*GATE: Checked by main() before returning*
-
-- [ ] All contracts have corresponding tests
-- [ ] All entities have model tasks
-- [ ] All tests come before implementation
-- [ ] Parallel tasks truly independent
-- [ ] Each task specifies exact file path
-- [ ] No task modifies same file as another [P] task
+## Validation Checklist (global gate)
+- [ ] Every public API in the Matrix has at least one `@module(...)` task
+- [ ] No file-paths appear in global tasks
+- [ ] Priorities set (P1/P2/P3)
+- [ ] Parallel markers are not used to force cross-module work
+- [ ] Global acceptance checks mapped to modules

@@ -1,2 +1,3 @@
+# Ignore both .logs and logs directories/files
 .logs
 logs
