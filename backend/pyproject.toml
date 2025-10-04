@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-life-backend"
+version = "0.1.0"
+description = "AI Life OS backend (MVP)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []  # keep runtime deps empty for MVP
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.6.8",
+  "mypy>=1.11",
+  "pytest>=8.3",
+  "pytest-cov>=5.0",
+]
+
+[tool.hatch.build.targets.wheel]
+# src-layout: project is under backend/src/ai_life_backend
+packages = ["src/ai_life_backend"]
+
+# Ruff (lint + format)
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E","F","W","I","UP","B","SIM","N","C90","PL","S","RUF"]
+ignore = ["E203","E266"]
+# we're running from backend/, so tests live at "tests/**"
+per-file-ignores = { "tests/**" = ["S101","PLR2004"] }
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# Mypy (strict-ish)
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+no_implicit_optional = true
+warn_return_any = true
+warn_unused_ignores = true
+strict_equality = true
+check_untyped_defs = true
+ignore_missing_imports = true
+
+# Pytest — запуск из backend/
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-q"
+testpaths = ["tests"]

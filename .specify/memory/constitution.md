@@ -1,45 +1,89 @@
-<!-- Sync Impact Report: 
-Version Change: N/A (initial version) -> 1.0.0
-Principles: Created 5 foundational principles for AI Life OS 
-  - AI-First Architecture
-  - Autonomous Operation
-  - Adaptive Learning (NON-NEGOTIABLE)
-  - Privacy-First Design
-  - Safety & Ethics
-Added Sections: Security Requirements, Development Workflow 
-Removed Sections: N/A (completely new constitution)
-Templates Updated: N/A (all templates are compatible with the new constitution) 
+<!-- Sync Impact Report:
+Version Change: 1.2.0 -> 1.3.0
+Principles: Kept; strengthened Clean Code & UV-only package policy
+Added Sections: Package Management (UV-only), Clean Code hard constraints expanded
+Removed Sections: Any references to non-UV tooling
+Templates Updated: Compatible
 Follow-up TODOs: None
 -->
 # AI Life OS Constitution
 
 ## Core Principles
-
 ### AI-First Architecture
-Every component must be designed with AI integration in mind; All systems must support AI decision-making capabilities; Clear AI interaction protocols required - no components without AI interfaces
+Design every component with AI integration in mind; expose clear AI-facing interfaces.
 
 ### Autonomous Operation
-The system must function independently with minimal human intervention; All processes must have self-monitoring and self-healing capabilities; Resilience through AI-driven adaptation to changing conditions
+Self-monitoring & self-healing; minimal human intervention.
 
 ### Adaptive Learning (NON-NEGOTIABLE)
-Continuous learning from user interactions and environment: Data collected → AI models trained → System behavior improved; All learning cycles must be verified for safety and ethics
+Learning cycles must be safe, auditable, and ethical.
 
 ### Privacy-First Design
-Focus areas requiring privacy protection: User data encryption, Consent management, Data anonymization, Privacy-preserving algorithms
+Encrypt at rest & in transit; consent; anonymization where possible.
 
 ### Safety & Ethics
-AI behavior must be transparent and explainable; Ethical guidelines must be embedded in decision-making; Safety measures prevent harmful AI actions
+Transparent, explainable behavior; hard safety rails.
 
 ## Security Requirements
+Harden models against adversarial inputs; multi-layer auth; full encryption for user data.
 
-All AI models must be secured from adversarial attacks; Multi-layer authentication for system access; Encryption of all user data at rest and in transit
+## Project Structure & Module Boundaries
+- Monorepo: `frontend/`, `backend/` at repo root.
+- Backend src-layout: `backend/src/ai_life_backend/` with subpackages:
+  - `api/` (transport), `services/` (use-cases), `repository/` (data access), `domain/` (entities), `config/` (settings).
+- Interact only via **public surfaces**; **no cross-module edits**. Use handoff notes/PRs for changes in other modules.
+- Assistants must not modify files outside the current module’s allowed directories.
+
+## Spec Kit Workflow Adaptations
+- Global feature `tasks.md` contains a **Module API Matrix** and high-level `@module(...)` items (no file paths).
+- `/fanout-tasks <feature-id>` creates/refreshes `tasks.by-module/<module>-tasks.md` with a protected **FANOUT** block.
+- `/module-tasks <feature-id> <module>` expands file-scoped steps (tests → implementation → integration → polish) **outside** the FANOUT block.
+- `/implement MODULE=<name> [FEATURE=<id>]` executes **strictly** within module boundaries.
+
+## Package Management (UV-only)
+- **UV is the single source of truth.** Use `pyproject.toml` + `uv.lock`.
+- **Required commands:** `uv lock`, `uv sync`, `uv run ...`.
+- **Prohibited:** `requirements*.txt`, pip, pip-tools, Poetry, Conda, Hatch build steps (unless explicitly re-approved later).
+- Changes that introduce non-UV package management **must be rejected** in review.
+
+## Clean Code & Simplicity (NON-NEGOTIABLE)
+- **Readability first:** intention-revealing names, English only, no abbreviations.
+- **SOLID strictly enforced:**
+  - *S*: single responsibility for modules/classes/functions.
+  - *O*: extension via interfaces/composition; avoid modification of stable code.
+  - *L*: substitutable abstractions; no surprising side effects.
+  - *I*: small, focused interfaces; no “god” interfaces.
+  - *D*: depend on abstractions; repositories/services behind contracts.
+- **No magic values:** magic numbers/strings are forbidden. Extract to named constants or config in `config/`. Enforced by lint rules (e.g., PLR2004).
+- **Small units:** functions ≤ ~40 lines; files ≤ ~300 lines. If larger — split/refactor.
+- **Low complexity:** cyclomatic complexity ≤ 8 (Ruff mccabe).
+- **Explicit types:** no untyped defs in production; return types required; mypy strict-ish must pass.
+- **DRY:** deduplicate logic; extract helpers; forbid copy-paste across modules.
+- **KISS & YAGNI:** MVP for a single user; avoid premature abstractions.
+- **No global mutable state:** inject dependencies.
+- **Pure where possible:** pure domain logic; side effects at edges (api/infra).
+- **Errors:** fail fast with explicit exceptions; no silent catches.
+- **Docs:** docstrings for public APIs; comments explain **why**, not **what**.
+- **Naming:** `snake_case` (func/vars), `PascalCase` (classes), `UPPER_SNAKE_CASE` (constants).
+- **Tests-first:** tasks must write failing tests before implementation.
+
+## Forbidden Constructs
+- Wildcard imports, `exec`/`eval`, hidden I/O in getters, “god classes”, circular imports.
+- Overuse of inheritance; prefer composition and small protocols.
+- Cross-module edits without a handoff note.
+
+## Module Code Gates
+- **Lint gate:** `uv run ruff check .` must pass (configured rule set).
+- **Type gate:** `uv run mypy src` must pass for the changed module.
+- **Test gate:** failing tests first → then passing; tasks cannot be ticked `[x]` until all gates pass.
 
 ## Development Workflow
+TDD in module tasks; peer reviews verify ethics/privacy; deployments require safety validation.
 
-All code changes must include AI behavior tests; Peer reviews verify ethical AI compliance; Deployment requires safety validation
+## Secrets Policy
+No secrets in VCS. Use `.env` (ignored) or a secret manager; never log secrets.
 
-## Governance
+## Observability & CI
+Structured logs; basic health checks; CI runs lint/type/test gates for impacted modules.
 
-All PRs/reviews must verify compliance with AI ethics; Complexity must be justified with safety measures; Use of interpretable AI models prioritized over black-box solutions
-
-**Version**: 1.0.0 | **Ratified**: 2025-10-03 | **Last Amended**: 2025-10-03
+**Version**: 1.3.0 | **Ratified**: 2025-10-04 | **Last Amended**: 2025-10-04
