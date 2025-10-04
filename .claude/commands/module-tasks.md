@@ -1,29 +1,27 @@
-# /module-tasks <feature-id> <module>
-
-**Goal**
-Generate/refresh one module’s detailed task file by merging:
-- Global constitution + `<module>.constitution.md` (if present)
-- Global tasks for this module (from the FANOUT block)
-- Feature design docs (plan.md required)
-
-**Args**
-- `<feature-id>` (e.g., `001-ui-llm-get`)
-- `<module>` (e.g., `backend`, `frontend`, `repo`, ...)
+# /module-tasks <feature-id> <module-id>
 
 **Reads**
-- `.specify/memory/constitution.md` (global)
-- `.specify/memory/<module>.constitution.md` (optional)
-- `.specs/<feature-id>/plan.md` (required)
-- `.specs/<feature-id>/data-model.md`, `contracts/`, `research.md` (optional)
-- `.specs/<feature-id>/tasks.by-module/<module>-tasks.md` (scaffold)
-
-**Writes**
-- Update the same file, but:
-  - **Do not** modify the protected FANOUT block
-  - Expand other sections into file-scoped, TDD-first steps (tests → impl → integration → polish)
-  - Enforce boundary rules from constitutions
+- `specs/<feature-id>/plan.md`
+- `specs/<feature-id>/tasks.md` (global)
+- `.specify/memory/public/registry.yaml`
+- MANIFEST + CONTRACT for `<module-id>` and for all modules in its `uses` list
+- Global constitution + `.specify/memory/<module-id>.constitution.md` (if exists)
 
 **Rules**
-- Tests must be authored and must fail before implementation
-- `[P]` only when tasks touch different files and have no deps
-- If cross-module edits are required, generate a **handoff note** instead of changing other modules
+- Treat all dependencies as opaque: use their MANIFEST/CONTRACT only; do not read their sources.
+- Respect `allowed_dirs` boundaries for `<module-id>`.
+- If dependent API is missing → append a HANDOFF to `specs/<feature-id>/handoff.md` for the owner module.
+
+**Expand**
+- Generate detailed tasks in `specs/<feature-id>/tasks.by-module/<module-id>-tasks.md`:
+  - Phases: Setup → Tests → Implementation → Integration → Polish → **Docs sync**
+  - Each task must include concrete file paths inside `allowed_dirs`.
+  - **Docs sync** must include:
+    - Update MANIFEST (add/change exports)
+    - Update CONTRACT (.d.ts/Protocol)
+    - Bump module SemVer if public API changed
+    - Run: `python .specify/scripts/registry_validate.py`
+    - Run: `python .specify/scripts/manifest_lint.py`
+
+**Output**
+- Overwrite only outside the protected FANOUT block.

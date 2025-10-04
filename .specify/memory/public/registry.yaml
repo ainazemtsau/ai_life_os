@@ -1,0 +1,21 @@
+# Public Surface Registry (v1)
+# Единственный источник правды для кросс-модульных зависимостей.
+# Модуль = "side.name" (например: backend.repo, frontend.design)
+
+version: 1
+modules: {}
+
+# Схема модуля (для справки):
+# modules:
+#   <id>:
+#     kind: python | typescript
+#     semver: "0.1.0"
+#     manifest: "<path-to-*.api.md>"         
+#     contract: "<path-to-language-contract>" 
+#     import_hint: "<how-to-import-facade>"  
+#     allowed_dirs:                           
+#       - "<glob1>"
+#       - "<glob2>"
+#     uses:                                  
+#       - "<other.module.id>"
+#     notes: "<optional>"

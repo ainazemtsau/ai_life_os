@@ -1,105 +1,102 @@
+# /implement MODULE=<module-id> [FEATURE=<feature-id>]
+
+**Purpose**  
+Execute the implementation plan **for a single module** using its per-module task file, with hard boundaries and public-API-only access via the Registry.
+
 ---
-description: Execute implementation for a SPECIFIC module using per-module tasks (TDD, module boundaries).
+
+## Expected arguments
+- `MODULE=<module-id>` (required). Example: `backend.repo` or `frontend.design`
+- `FEATURE=<feature-id>` (optional). Example: `003-goals-agents-mvp`.  
+  If omitted, **discover** by reading `specs/*/tasks.by-module/<MODULE>-tasks.md`.
+
 ---
 
-The user input may be provided as command arguments — you MUST parse and honor it before proceeding.
+## Inputs & Layout (YOUR repo)
+- Features live at: `specs/<FEATURE>/`
+- Global tasks: `specs/<FEATURE>/tasks.md`
+- Per-module tasks: `specs/<FEATURE>/tasks.by-module/<MODULE>-tasks.md`
+- Handoff file: `specs/<FEATURE>/handoff.md` (create if missing)
+- Constitutions:
+  - Global: `.specify/memory/constitution.md`
+  - Module-local (optional): `.specify/memory/<MODULE>.constitution.md`
+- Public API Registry (MANDATORY): `.specify/memory/public/registry.yaml`
+- Validators:  
+  - `.specify/scripts/registry_validate.py`  
+  - `.specify/scripts/manifest_lint.py`
 
-User input (raw):
-$ARGUMENTS
+---
 
-# Expected arguments:
-#   MODULE=<module-key>            # REQUIRED (e.g., repo, backend, frontend, api, auth, ...)
-#   FEATURE=<feature-id>           # OPTIONAL (e.g., 001-two-modules). If omitted, discover via check-prerequisites.
+## Procedure (do this in order)
 
-## 1) Discover feature context and required docs
-1. Run from REPO ROOT:
-   `.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks`
-   Parse JSON and extract:
-     - FEATURE_DIR (absolute path; e.g., <repo>/.specify/specs/<feature-id>)
-     - AVAILABLE_DOCS (list of discovered docs)
-   If FEATURE was explicitly provided in $ARGUMENTS, VERIFY it matches FEATURE_DIR; otherwise override FEATURE by detected value.
+### 1) Argument parsing & discovery
+1. Parse user arguments. If `MODULE` missing → **STOP** with error.  
+2. If `FEATURE` not provided:
+   - Search for `specs/*/tasks.by-module/<MODULE>-tasks.md`.  
+   - If exactly one match → use that `<FEATURE>`. Else → **STOP** and request explicit `FEATURE`.
+3. Compute absolute paths for all files listed in **Inputs & Layout**.  
+   **REQUIRE**: `plan.md` and `<MODULE>-tasks.md` must exist; otherwise instruct to run `/plan` or `/module-tasks`.
 
-2. Parse $ARGUMENTS and extract MODULE=<module-key>.
-   - If MODULE is missing or empty → HARD ERROR:
-     "MODULE is required. Re-run as: /implement MODULE=<name> [FEATURE=<id>]"
+### 2) Load context (Registry-driven, NO deep-inspection)
+4. Read `.specify/memory/public/registry.yaml`:
+   - Find `<MODULE>` entry → read: `allowed_dirs`, `import_hint`, `uses`, `manifest`, `contract`, `semver`.
+   - For each module in `uses`, read **their** `manifest` and `contract` too.
+5. **Treat dependencies as opaque**:  
+   - Use ONLY their MANIFEST + CONTRACT;  
+   - **Do NOT** open or scan their source directories;  
+   - Imports must follow `import_hint` only.
+6. Load constitutions: global + module-local (if any). Enforce clean code gates and boundaries.
 
-3. Compute absolute paths:
-   - GLOBAL_TASKS      = {FEATURE_DIR}/tasks.md
-   - PLAN              = {FEATURE_DIR}/plan.md
-   - MODULE_TASKS      = {FEATURE_DIR}/tasks.by-module/{MODULE}-tasks.md
-   - DATA_MODEL (opt)  = {FEATURE_DIR}/data-model.md
-   - CONTRACTS_DIR(opt)= {FEATURE_DIR}/contracts/
-   - RESEARCH (opt)    = {FEATURE_DIR}/research.md
-   - CONST_GLOBAL (opt)= <repo>/.specify/memory/constitution.md
-   - CONST_MODULE(opt) = <repo>/.specify/memory/{MODULE}.constitution.md
+### 3) Execute per-module tasks (TDD-first, boundaries enforced)
+7. Parse `specs/<FEATURE>/tasks.by-module/<MODULE>-tasks.md`:
+   - Identify phases, `[P]` markers (parallel-safe), explicit file paths, dependencies.
+   - Ensure all paths are **within `allowed_dirs`** for this module. If not → **STOP** and fix tasks file first.
+8. Execute by phases (Setup → Tests → Implementation → Integration → Polish):
+   - **TDD**: tests must be authored to fail before implementation.
+   - `[P]`: run in parallel only if tasks touch different files and have no deps.
+   - Same-file tasks must be sequential.
+   - After a task truly passes (tests/linters), mark `[x]` in the module tasks file and commit.
 
-   VALIDATE:
-   - PLAN must exist → else ERROR "plan.md is required, run /plan"
-   - MODULE_TASKS must exist → else ERROR:
-     "Module tasks not found. Run: /fanout-tasks <feature-id> and /module-tasks <feature-id> <module>"
+### 4) Public API Docs sync (mandatory)
+9. If public exports were changed/added/removed:
+   - Update `<MODULE>.manifest` (`.specify/memory/public/*.api.md`): **Exports**, **Types**, **Usage**, **Version: x.y.z**.
+   - Update `<MODULE>.contract` (`.d.ts` or `Protocol.py`) accordingly.
+   - **SemVer**:  
+     - additive (backward-compatible) → MINOR;  
+     - breaking change → MAJOR;  
+     - bugfix / doc-only → PATCH.
+10. Run validators (must pass):
+    ```bash
+    python .specify/scripts/registry_validate.py
+    python .specify/scripts/manifest_lint.py
+    ```
 
-## 2) Load and analyze implementation context
-4. READ (do not skip):
-   - MODULE_TASKS: the ONLY source of executable tasks (IDs MT###, [P], exact file paths, phases)
-   - PLAN: tech stack, layout, allowed directories / module boundaries
-   - CONST_GLOBAL (if exists): cross-cutting constraints
-   - CONST_MODULE (if exists): module-specific constraints
-   - GLOBAL_TASKS: reference ONLY (public API matrix & mapping), DO NOT execute from here
-   - DATA_MODEL / CONTRACTS / RESEARCH: supportive info if present
+### 5) Handoff instead of cross-module edits
+11. If some change is needed in another module:
+    - Append an entry to `specs/<FEATURE>/handoff.md`:
+      - `from`: <MODULE>
+      - `to`: <target-module-id>
+      - `reason`: <why>
+      - `required change`: <API addition/change described via manifest + contract>
+      - `blocking`: yes|no
+    - **STOP** editing foreign modules.
 
-5. DERIVE allowed directories for this module from PLAN and/or CONST_MODULE.
-   If not clearly specified, DEFAULT to:
-     - `src/modules/{MODULE}/**` and `tests/modules/{MODULE}/**` (single-project layout)
-   ENFORCE: Never edit files outside allowed directories. For cross-module needs, create a HANDOFF note.
+### 6) Safety rails
+- Never modify files outside `<MODULE>` `allowed_dirs`.
+- Never import symbols from other modules except via their `import_hint`.
+- If the per-module task file lacks explicit paths or includes foreign paths → fix tasks first (do not guess).
+- Follow Clean Code & simplicity rules from constitution (SOLID, no magic values, small functions/files, DRY, KISS).
 
-## 3) Execute per-module tasks (TDD-first, strict ordering)
-6. Parse MODULE_TASKS into phases and tasks with:
-   - ID (MT###), [P] marker, description, explicit file paths, and any dependencies.
-   - DO NOT invent paths. If a task lacks a path, update the task with a precise path before editing code.
+### 7) Completion report
+12. Output a concise summary:
+    - Completed task IDs
+    - Files created/modified
+    - API/manifest updates + new SemVer
+    - Validators status
+    - Any HANDOFF items created
 
-7. For each phase in order (Setup → Tests → Implementation → Integration → Polish):
-   Execute tasks respecting:
-   - TDD: tests MUST be authored and MUST FAIL before implementation.
-   - [P]: only run in parallel when tasks touch DIFFERENT files and have NO dependencies.
-   - Same-file tasks MUST run sequentially.
+---
 
-   For each task:
-   a) If it's a **test** task:
-      - Create/update the test file with assertions that SHOULD FAIL initially.
-      - Run tests; confirm they fail with a meaningful assertion.
-   b) If it's an **implementation** task:
-      - Implement the minimal code to satisfy the failing test(s).
-      - Re-run tests; confirm they pass.
-   c) If it's an **integration** task:
-      - Wire modules/components as specified; never modify other modules directly.
-      - If another module needs changes, append a HANDOFF entry instead of editing that module.
-
-   After a task is truly complete:
-   - Mark it as `[x]` in MODULE_TASKS (do NOT touch GLOBAL_TASKS).
-   - If using VCS, commit with message: `"{MODULE}: {TASK_ID} {1-line summary}"`.
-
-## 4) HANDOFF notes (instead of cross-module edits)
-8. If a required change belongs to a different module:
-   - Append to `{FEATURE_DIR}/handoff.md` with fields:
-     - module: <target-module>
-     - reason: <why needed>
-     - spec: <public surface / contract to modify>
-     - suggested changes (code pointers, file paths)
-     - blocking?: yes|no
-   - Reference the originating MT task ID.
-
-## 5) Validation & completion
-9. When all MT tasks are marked `[x]`:
-   - Run the module test suite (targeted paths) and, if available, the full suite.
-   - Ensure results align with PLAN and constitutions (global + module).
-   - Output a concise summary:
-     - Completed task IDs
-     - Files created/modified
-     - Any HANDOFF entries created
-     - Follow-ups (if any)
-
-## 6) Hard safety rails
-- NEVER modify files outside the allowed module directories.
-- NEVER tick a task to `[x]` without verifying (tests where applicable).
-- If MODULE_TASKS appears inconsistent or incomplete, STOP and instruct to re-run:
-  `/module-tasks <feature-id> <module>` (or adjust the module tasks file), then resume.
+## Notes
+- This command assumes the module tasks already exist. If not, run `/fanout-tasks <FEATURE>` then `/module-tasks <FEATURE> <MODULE>`.
+- Do not “peek” into other modules’ sources. MANIFEST + CONTRACT are the only allowed external knowledge.

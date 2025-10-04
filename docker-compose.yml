@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: aios_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend          # ← контекст = подпапка backend
+      dockerfile: Dockerfile
+    container_name: aios_backend
+    env_file:
+      - ./.env
+    environment:
+      BACKEND_PORT: ${BACKEND_PORT}
+      DATABASE_URL: ${DATABASE_URL}
+    volumes:
+      - ./backend:/app:cached     # монтируем исходники backend целиком
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT}:8000"
+    command: ["bash", "-lc", "echo 'backend waiting (no server yet)'; tail -f /dev/null"]
+
+  frontend:
+    build:
+      context: ./frontend         # ← контекст = подпапка frontend
+      dockerfile: Dockerfile
+    container_name: aios_frontend
+    env_file:
+      - ./.env
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    volumes:
+      - ./frontend:/app:cached    # монтируем проект
+      - /app/node_modules         # анонимный volume для node_modules в контейнере
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT}:3000"
+
+volumes:
+  db_data:
