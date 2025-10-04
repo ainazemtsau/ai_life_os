@@ -45,3 +45,10 @@ logs/
 *.code-workspace
 .DS_Store
 Thumbs.db
+
+node_modules/
+.next/
+out/
+.vercel/
+.turbo/
+pnpm-debug.log*
