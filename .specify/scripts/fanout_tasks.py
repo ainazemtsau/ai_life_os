@@ -102,8 +102,41 @@ def detect_module(line: str) -> str | None:
     return None
 
 def parse_checkbox_items(text: str):
+    # Find the "## Global Tasks by Module (high-level only)" section
+    lines = text.splitlines()
+    start_idx = -1
+    end_idx = len(lines)
+    
+    # Look for the start of the target section
+    for i, line in enumerate(lines):
+        if line.strip().startswith("## Global Tasks by Module (high-level only)"):
+            start_idx = i
+            break
+    
+    if start_idx == -1:
+        # If the section header isn't found, parse the whole file as before (fallback)
+        items = []
+        for idx, line in enumerate(lines):
+            m = CHECKBOX_RE.match(line)
+            if not m:
+                continue
+            done = m.group("done").lower() == "x"
+            body = m.group("body")
+            module = detect_module(line)
+            items.append(dict(idx=idx, line=line, body=body, done=done, module=module))
+        return items
+    
+    # Look for the end of the section (next heading of same or higher level)
+    for i in range(start_idx + 1, len(lines)):
+        line = lines[i]
+        if line.strip().startswith("## "):  # Another second-level heading or higher
+            end_idx = i
+            break
+    
+    # Process only the content within the target section
     items = []
-    for idx, line in enumerate(text.splitlines()):
+    for idx in range(start_idx + 1, end_idx):
+        line = lines[idx]
         m = CHECKBOX_RE.match(line)
         if not m:
             continue
@@ -111,6 +144,7 @@ def parse_checkbox_items(text: str):
         body = m.group("body")
         module = detect_module(line)
         items.append(dict(idx=idx, line=line, body=body, done=done, module=module))
+    
     return items
 
 def build_fanout_block(items_for_module):
@@ -137,12 +171,18 @@ def main():
     args = ap.parse_args()
 
     root = Path(".").resolve()
+    # First try the original location, then fallback to specs/ directory
     tasks_path = Path(args.tasks) if args.tasks else root / ".specify" / "specs" / args.feature_id / "tasks.md"
     if not tasks_path.exists():
-        print(f"ERROR: tasks file not found: {tasks_path}", file=sys.stderr)
-        sys.exit(1)
+        tasks_path = root / "specs" / args.feature_id / "tasks.md"
+        if not tasks_path.exists():
+            print(f"ERROR: tasks file not found: {tasks_path}", file=sys.stderr)
+            sys.exit(1)
 
+    # First try the original location, then fallback to specs/ directory
     outdir = Path(args.outdir) if args.outdir else root / ".specify" / "specs" / args.feature_id / "tasks.by-module"
+    if not outdir.exists():
+        outdir = root / "specs" / args.feature_id / "tasks.by-module"
     template_path = root / ".specify" / "templates" / "module-tasks-template.md"
 
     text = read_text(tasks_path)
@@ -160,6 +200,9 @@ def main():
         print("ERROR: no checkbox tasks found in global tasks.md", file=sys.stderr)
         sys.exit(3)
 
+    # Get all existing module task files to potentially clean up
+    existing_module_files = list(outdir.glob("*-tasks.md"))
+    
     # Write/update each module file
     for module, its in sorted(by_module.items(), key=lambda kv: kv[0]):
         module_file = outdir / f"{module}-tasks.md"
@@ -167,19 +210,40 @@ def main():
         fanout = build_fanout_block(sorted(its, key=lambda it: it["idx"]))
         updated = replace_block(current, FANOUT_BEGIN, FANOUT_END, fanout)
         write_text(module_file, updated)
+        
+        # Remove this file from existing files list as it's still needed
+        if module_file in existing_module_files:
+            existing_module_files.remove(module_file)
+
+    # Remove files for modules that no longer have any tasks
+    for old_module_file in existing_module_files:
+        old_module_name = old_module_file.stem.replace('-tasks', '')
+        # Only remove if this module is not in our current by_module dict
+        if old_module_name not in by_module:
+            old_module_file.unlink()
+            safe_print(f"  - Removed {old_module_file} (module no longer has tasks)")
 
     # Summary
-    print("\nFan-out summary:")
+    safe_print("\nFan-out summary:")
     if by_module:
         for module, its in sorted(by_module.items()):
-            print(f"  - {module:<10} {len(its):>3} items  → { (outdir / f'{module}-tasks.md').as_posix() }")
+            safe_print(f"  - {module:<10} {len(its):>3} items  -> {str((outdir / f'{module}-tasks.md'))}")
     else:
-        print("  (no module-assigned items)")
+        safe_print("  (no module-assigned items)")
 
     if unassigned:
-        print("\nUnassigned items (no @module tag and no path hint):")
+        safe_print("\nUnassigned items (no @module tag and no path hint):")
         for it in unassigned:
-            print(f"  - line {it['idx']+1}: {it['body'][:100]}")
+            safe_print(f"  - line {it['idx']+1}: {it['body'][:100]}")
+
+def safe_print(text):
+    """Print text safely, replacing problematic characters"""
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        # Replace non-ASCII characters and try again
+        safe_text = text.encode('ascii', errors='replace').decode('ascii')
+        print(safe_text)
 
 if __name__ == "__main__":
     from collections import defaultdict

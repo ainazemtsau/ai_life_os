@@ -13,9 +13,9 @@ Generate/refresh one module’s detailed task file by merging:
 **Reads**
 - `.specify/memory/constitution.md` (global)
 - `.specify/memory/<module>.constitution.md` (optional)
-- `.specify/specs/<feature-id>/plan.md` (required)
-- `.specify/specs/<feature-id>/data-model.md`, `contracts/`, `research.md` (optional)
-- `.specify/specs/<feature-id>/tasks.by-module/<module>-tasks.md` (scaffold)
+- `.specs/<feature-id>/plan.md` (required)
+- `.specs/<feature-id>/data-model.md`, `contracts/`, `research.md` (optional)
+- `.specs/<feature-id>/tasks.by-module/<module>-tasks.md` (scaffold)
 
 **Writes**
 - Update the same file, but:

@@ -1,0 +1,41 @@
+description = "Fan-out the global tasks.md into per-module files and update only the FANOUT blocks in each module-tasks.md"
+
+prompt = """
+/fanout-tasks <feature-id>
+
+Goal
+- Distribute the global tasks from .specify/specs/<feature-id>/tasks.md into per-module files without deep expansion, and overwrite only the protected FANOUT block in each module file.
+
+Args
+- <feature-id>: directory under .specify/specs/ (e.g., 001-ui-llm-get).
+- The command uses a single positional argument: {{args}}.
+
+Reads
+- .specify/specs/{{args}}/tasks.md (global task list)
+- .specify/templates/module-tasks-template.md (optional scaffold)
+
+Writes
+- .specify/specs/{{args}}/tasks.by-module/<module>-tasks.md
+  - Create the file if missing (seed from the template if present)
+  - Update ONLY the section between:
+    <!-- FANOUT:BEGIN --> ... <!-- FANOUT:END -->
+
+Module detection
+1) Prefer the explicit @module(<name>) tag in the task line.
+2) If missing, infer by path hints:
+   - backend/ → backend
+   - frontend/ → frontend
+   - api/ → api
+   - repo/ → repo
+   - ios/ → ios
+   - android/ → android
+
+Procedure (preferred)
+- Use the existing helper script for a clean fan-out step and a summary printout:
+!{python3 .specify/scripts/fanout_tasks.py "{{args}}"}
+!{python .specify/scripts/fanout_tasks.py "{{args}}"}
+
+Notes
+- Do NOT load module constitutions; perform only the fan-out step.
+- Print a summary of modules and item counts when finished; list items with no detectable module as "unassigned".
+"""

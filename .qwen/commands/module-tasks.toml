@@ -1,0 +1,138 @@
+# module-tasks.toml
+
+description = "Generate/refresh one module’s detailed task file from the global feature using FANOUT as source; merge global + module constitutions; enforce TDD and module boundaries."
+
+prompt = """
+---
+description: Generate/refresh one module’s detailed task file by merging global + module constitutions and the feature’s design docs. Preserve the protected FANOUT block, expand everything else into file-scoped, TDD-first steps.
+---
+
+# Command signature (YOU MUST follow it):
+# /module-tasks <feature-id> <module>
+
+The user input to you is provided as command arguments and/or in the chat.
+**You MUST parse $ARGUMENTS first** and abort with a helpful message if invalid.
+
+User input:
+
+$ARGUMENTS
+
+## 0) Parse arguments and resolve paths (REQUIRED)
+1) Expect exactly 2 arguments:
+   - feature-id (e.g., "001-ui-llm-get")
+   - module (e.g., "backend", "frontend", "repo", ...)
+2) Compute absolute paths from repo root:
+   FEATURE_DIR = ".specify/specs/<feature-id>/"
+   GLOBAL_TASKS = FEATURE_DIR + "tasks.md"
+   MODULE_TASKS = FEATURE_DIR + "tasks.by-module/<module>-tasks.md"
+   PLAN = FEATURE_DIR + "plan.md"
+   DATA_MODEL = FEATURE_DIR + "data-model.md" (optional)
+   RESEARCH = FEATURE_DIR + "research.md" (optional)
+   CONTRACTS_DIR = FEATURE_DIR + "contracts/" (optional)
+   GLOBAL_CONSTITUTION = ".specify/memory/constitution.md"
+   MODULE_CONSTITUTION = ".specify/memory/<module>.constitution.md" (optional)
+
+3) Pre-flight checks (abort with actionable message if any fail):
+   - PLAN must exist (Spec Kit invariant). If missing, ask user to run `/plan` for this feature.
+   - GLOBAL_TASKS must exist (from `/tasks`). If missing, ask to run `/tasks`.
+   - MODULE_TASKS must exist (created by `/fanout-tasks`). If missing, ask to run `/fanout-tasks <feature-id>` first.
+
+## 1) Read inputs (NO shell unless necessary; prefer direct file read/write)
+- Read: PLAN (required)
+- Read: GLOBAL_TASKS (required)
+- Read: MODULE_TASKS (required)
+- Read: GLOBAL_CONSTITUTION (required if present)
+- Read: MODULE_CONSTITUTION (optional)
+- Read: DATA_MODEL / RESEARCH / CONTRACTS_DIR if present (optional)
+- Extract key constraints from constitutions; module constitution refines specifics, global constitution rules remain supreme.
+
+## 2) Locate the protected FANOUT block in MODULE_TASKS
+- Block markers:
+  FANOUT_BEGIN = "<!-- FANOUT:BEGIN -->"
+  FANOUT_END   = "<!-- FANOUT:END -->"
+- DO NOT modify the content between these markers.
+- Inside the FANOUT block, collect the list of **source global items** (checkbox lines like "- [ ] ..." or "- [x] ..."). Preserve their original order; treat them as the authoritative high-level items for this module.
+
+## 3) Expand detailed, file-scoped tasks OUTSIDE the FANOUT block
+**Core rules you MUST enforce:**
+- **TDD first:** For each capability, author tests that MUST fail before implementation (contract/integration/unit as appropriate).
+- **Module boundaries:** Only touch this module’s allowed paths. If cross-module edits are required, write a **handoff note** instead (no edits outside the module).
+- **Parallelism marker [P]:** Only if tasks touch different files AND have no dependencies.
+- **IDs:** Use `MT001, MT002, ...` (stable increment). If existing MT-IDs are present, continue numbering without collisions.
+- **Explicit paths:** Every task MUST name the exact file path(s) it edits or creates.
+- **Minimal viable changes:** Keep tasks small and testable; prefer many small steps over one broad step.
+
+### 3a) Determine allowed paths for this module
+- Prefer to read them from PLAN (e.g., "Allowed paths" section).
+- If not specified, default to:
+  - Single project layout:
+      src/modules/<module>/**, tests/modules/<module>/**
+  - Or if PLAN uses a different layout, adapt accordingly (e.g., backend/src/<module>/** etc.).
+- NEVER suggest or perform edits outside the module.
+
+### 3b) Derive concrete tasks from sources
+- Use the source items listed in the FANOUT block as the authoritative input (plus PLAN/DATA_MODEL/CONTRACTS when relevant).
+- For each source item:
+  1) Add tests-first tasks (contract/integration/unit) with explicit file paths under tests/** for this module.
+  2) Add implementation tasks under src/** for this module that satisfy the tests.
+  3) Add integration/cross-cutting tasks (within boundaries) if needed.
+  4) Add polish tasks (docs for module, small cleanup) if warranted.
+- Keep the task phases organized (A: Setup, B: Tests, C: Implementation, D: Integration, E: Polish) and include a **Dependencies** section at the end.
+
+### 3c) Validation before write
+- Ensure each test task appears BEFORE the implementation that satisfies it.
+- Ensure **no** detailed task touches files outside the module.
+- Ensure every task includes file paths.
+- If any source item cannot be realized without cross-module edits:
+  - Write a **Handoff Note** subsection listing the required change (no edits outside the module).
+- Keep the existing FANOUT content intact and unmoved.
+
+## 4) Write back MODULE_TASKS
+- Strategy: parse the file into three segments:
+  [PRE] ... FANOUT_BEGIN
+  [FANOUT] (DO NOT TOUCH)
+  FANOUT_END ... [POST]
+- Rewrite [PRE] and [POST] with the refreshed detailed content.
+- Preserve headings and any user-authored text outside the regenerated sections if still valid.
+- Use Markdown headings:
+  - "# Module Tasks: <module> for Feature <feature-id>" (only if not already present)
+  - "## Execution Flow (module)"
+  - "## Allowed Paths"
+  - "## Phase A: Setup"
+  - "## Phase B: Tests First (MUST FAIL before C)"
+  - "## Phase C: Implementation (ONLY after tests are failing)"
+  - "## Phase D: Integration"
+  - "## Phase E: Polish"
+  - "## Dependencies"
+  - "## Parallel Example"
+  - "## Notes"
+  Keep the **FANOUT** block between "FANOUT:BEGIN" / "FANOUT:END" untouched.
+
+## 5) Output a short completion report to the user
+- Module name, feature id
+- File written path
+- Count of detailed tasks generated/updated
+- Any handoff notes identified
+- Reminder: Implementation should now run with a module-scoped `/implement`.
+
+## 6) Behavior constraints
+- If MODULE_TASKS is missing, respond with: "Run `/fanout-tasks <feature-id>` first to scaffold per-module files."
+- If PLAN is missing, respond with: "Run `/plan` for this feature first."
+- If GLOBAL_TASKS missing, respond with: "Run `/tasks` for this feature first."
+- Never modify the FANOUT block content.
+- Never propose edits outside the module’s allowed paths.
+- Keep everything in English.
+
+## 7) Example of expected detailed task lines
+- [ ] MT001 [P] Contract test for <capability> in tests/modules/<module>/contract/test_<name>.py
+- [ ] MT002 Integration test for <flow> in tests/modules/<module>/integration/test_<flow>.py
+- [ ] MT003 Implement <file> at src/modules/<module>/<file>.py to satisfy MT001/MT002
+- [ ] MT004 Error handling & logging per module constitution in src/modules/<module>/...
+- [ ] MT005 [P] Update docs/modules/<module>.md
+
+## 8) Now perform the action
+- Implement the above plan immediately on the repository’s files.
+- Do NOT ask the user for confirmations; make a best effort with existing inputs.
+- If any required input is missing, fail fast with the precise next command the user must run.
+
+"""

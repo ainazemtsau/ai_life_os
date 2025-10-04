@@ -3,7 +3,7 @@
 **Inputs**:
 - Global constitution: `.specify/memory/constitution.md`
 - Module constitution (optional): `.specify/memory/[module].constitution.md`
-- Global tasks file: `.specify/specs/[###-feature-name]/tasks.md`
+- Global tasks file: `.specs/[###-feature-name]/tasks.md`
 - Design docs from `/specs/[###-feature-name]/`: `plan.md` (required), `data-model.md`, `contracts/`, `research.md`
 
 **Scope**:
