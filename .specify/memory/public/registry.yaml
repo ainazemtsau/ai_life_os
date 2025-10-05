@@ -1,21 +1,37 @@
-# Public Surface Registry (v1)
-# Единственный источник правды для кросс-модульных зависимостей.
-# Модуль = "side.name" (например: backend.repo, frontend.design)
-
 version: 1
-modules: {}
-
-# Схема модуля (для справки):
-# modules:
-#   <id>:
-#     kind: python | typescript
-#     semver: "0.1.0"
-#     manifest: "<path-to-*.api.md>"         
-#     contract: "<path-to-language-contract>" 
-#     import_hint: "<how-to-import-facade>"  
-#     allowed_dirs:                           
-#       - "<glob1>"
-#       - "<glob2>"
-#     uses:                                  
-#       - "<other.module.id>"
-#     notes: "<optional>"
+modules:
+  frontend.design:
+    kind: typescript
+    semver: 0.1.0
+    manifest: .specify/memory/public/frontend.design.api.md
+    contract: frontend/src/contracts/design.d.ts
+    import_hint: import * as design from '@/features/design'
+    allowed_dirs:
+    - frontend/src/features/design/**
+    - frontend/src/contracts/design.d.ts
+    uses: ["-"]
+    notes: 'Foundational design system with no dependencies'
+  backend.goals:
+    kind: python
+    semver: 0.1.0
+    manifest: .specify/memory/public/backend.goals.api.md
+    contract: backend/src/ai_life_backend/contracts/goals_contracts.py
+    import_hint: from ai_life_backend.goals.public import goals
+    allowed_dirs:
+    - backend/src/ai_life_backend/goals/**
+    - backend/tests/goals/**
+    uses: ["-"]
+    notes: 'First feature module, no cross-cutting dependencies for MVP'
+  frontend.goals:
+    kind: typescript
+    semver: 0.1.0
+    manifest: .specify/memory/public/frontend.goals.api.md
+    contract: frontend/src/contracts/goals.d.ts
+    import_hint: import * as goals from '@/features/goals'
+    allowed_dirs:
+    - frontend/src/features/goals/**
+    - frontend/src/contracts/goals.d.ts
+    uses:
+    - frontend.design
+    - backend.goals
+    notes: ''

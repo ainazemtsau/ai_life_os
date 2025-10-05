@@ -6,7 +6,7 @@ try:
 except Exception:
     yaml = None  # allow JSON fallback
 
-SEMVER_RE = re.compile(r"^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:[-+].*)?$")
+SEMVER_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:[-+].*)?$")
 
 def err(msg: str) -> None:
     print(f"[registry_validate] ERROR: {msg}", file=sys.stderr)
