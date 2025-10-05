@@ -4,34 +4,34 @@ modules:
     kind: typescript
     semver: 0.1.0
     manifest: .specify/memory/public/frontend.design.api.md
-    contract: frontend/src/contracts/design.d.ts
+    contract: "-"                         # no separate .d.ts contract
     import_hint: import * as design from '@/features/design'
     allowed_dirs:
-    - frontend/src/features/design/**
-    - frontend/src/contracts/design.d.ts
+      - frontend/src/features/design/**
     uses: ["-"]
-    notes: 'Foundational design system with no dependencies'
+    notes: 'Design System; import only from the root entrypoint'
+
   backend.goals:
     kind: python
     semver: 0.1.0
     manifest: .specify/memory/public/backend.goals.api.md
-    contract: backend/src/ai_life_backend/contracts/goals_contracts.py
-    import_hint: from ai_life_backend.goals.public import goals
+    contract: backend/src/ai_life_backend/contracts/goals_openapi.yaml   # single HTTP contract (OpenAPI)
+    import_hint: from ai_life_backend.goals.public import *              # same-process public port
     allowed_dirs:
-    - backend/src/ai_life_backend/goals/**
-    - backend/tests/goals/**
+      - backend/src/ai_life_backend/goals/**
+      - backend/tests/goals/**
     uses: ["-"]
-    notes: 'First feature module, no cross-cutting dependencies for MVP'
+    notes: 'Same-process: use in-process port from ai_life_backend.goals.public; Cross-process: use HTTP via OpenAPI'
+
   frontend.goals:
     kind: typescript
     semver: 0.1.0
     manifest: .specify/memory/public/frontend.goals.api.md
-    contract: frontend/src/contracts/goals.d.ts
+    contract: "-"                         # consumes backend.goals OpenAPI
     import_hint: import * as goals from '@/features/goals'
     allowed_dirs:
-    - frontend/src/features/goals/**
-    - frontend/src/contracts/goals.d.ts
+      - frontend/src/features/goals/**
     uses:
-    - frontend.design
-    - backend.goals
-    notes: ''
+      - frontend.design
+      - backend.goals
+    notes: 'Generate types/SDK from backend.goals OpenAPI'

@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.openapi.utils import get_openapi
 app = FastAPI(
     title="AI Life OS API",
     description="Goals Management MVP - Backend API",
@@ -34,6 +34,34 @@ def main() -> None:
     """Backend bootstrap entry point. Keep it minimal for now."""
     print("AI Life OS backend bootstrap OK")
 
+app = FastAPI(title="AI Life Backend", version="0.1.0", openapi_url="/openapi.json")
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description="Goals API",
+        routes=app.routes,
+    )
+    # Добавляем RFC7807 Problem в components.schemas
+    schema.setdefault("components", {}).setdefault("schemas", {})["Problem"] = {
+        "type": "object",
+        "properties": {
+            "type": {"type": "string", "format": "uri"},
+            "title": {"type": "string"},
+            "status": {"type": "integer"},
+            "detail": {"type": "string"},
+            "instance": {"type": "string", "format": "uri"},
+        },
+        "required": ["title", "status"],
+        "additionalProperties": True
+    }
+    app.openapi_schema = schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 if __name__ == "__main__":
     main()

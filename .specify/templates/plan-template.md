@@ -6,44 +6,45 @@
 ---
 
 ## Goal (LEAN)
-Fix **module boundaries** and **public surfaces** now. Keep **one HTTP contract = OpenAPI** (backend). No `.d.ts`, no Python Protocols. Generate tasks later via `/tasks`.
+Freeze **module boundaries** and **public surfaces** now. Keep **one HTTP contract = OpenAPI** (backend) for external/cross-process use. Inside the same process, use a **typed in-process public port** (DTOs). No duplicate contracts (.d.ts/Protocols).
 
 ## 1) Context & Constraints (short)
-Key constraints (e.g., single-user, last-write-wins), non-goals (keep it minimal).
+Key constraints (single-user, last-write-wins, etc.).
 
 ## 2) Module Map
-- **backend.[feature]** — REST API (single source = OpenAPI).
-- **frontend.[feature]** — UI using backend.[feature].
+- **backend.[feature]** — REST API for external/cross-process + in-process public port for same-process consumers.
+- **frontend.[feature]** — UI consuming backend.[feature].
 - **frontend.design** — design system (use only if present/required).
 
 ## 3) Public Surfaces (authoritative)
-| Module | Kind | What is public | How to use |
-|---|---|---|---|
-| backend.[feature] | py | Endpoints per OpenAPI (GET/POST/PATCH/DELETE …); errors = RFC 7807 `Problem` | Contract: `backend/src/.../contracts/[feature]_openapi.yaml` |
-| frontend.design | ts | { Button, Dialog, Input, Label, Card, Badge } | `import { Button } from '@/features/design'` |
-| frontend.[feature] | ts | { components, hooks } | `import { GoalList } from '@/features/[feature]'` |
+| Module | Kind | In-process Port (same process) | HTTP Contract (cross-process/external) | How to use |
+|---|---|---|---|---|
+| backend.[feature] | py | `from ai_life_backend.[feature].public import ...` (DTOs; read-only unless stated) | `backend/src/.../contracts/[feature]_openapi.yaml` (OpenAPI 3.1; errors = RFC7807 `Problem`) | import or call via generated client |
+| frontend.design | ts | `import { Button, ... } from '@/features/design'` | — | import entrypoint only |
+| frontend.[feature] | ts | `import { components/hooks } from '@/features/[feature]'` | — | import entrypoint only |
 
 > Anything not listed here is **private**.
 
 ## 4) Contracts
-- **OpenAPI 3.1** for backend HTTP modules (single source of truth). Include `components.schemas.Problem` per RFC 7807.  
-- Frontend consumes OpenAPI → types/SDK are generated outside `/plan`.
+- **OpenAPI 3.1** for backend HTTP surfaces (single source of truth; include `components.schemas.Problem` per RFC 7807). :contentReference[oaicite:1]{index=1}
+- In-process ports: typed functions returning **DTOs** (no ORM leakage).
 
 ## 5) Vertical Steps (outline for /tasks, ~8–10)
 1) DB/migrations  
-2) Endpoints (contract tests → implementation)  
-3) Export/validate OpenAPI  
-4) Generate TS types/SDK from OpenAPI  
-5) Frontend data client  
-6) UI: list + create  
-7) UI: edit/toggle/delete  
-8) Validations/empty states  
+2) In-process port (DTOs + functions) + tests  
+3) Endpoints (contract tests → implementation)  
+4) Export/validate OpenAPI (FastAPI auto-docs) :contentReference[oaicite:2]{index=2}  
+5) Generate TS types/SDK from OpenAPI  
+6) Frontend data client  
+7) UI: list + create  
+8) UI: edit/toggle/delete  
 9) E2E from spec  
 10) Polish errors (RFC 7807)
 
 ## 6) Risks & Notes (short)
 
 ## 7) Gates
-- `registry.yaml` updated; minimal manifests exist; OpenAPI path present.
-- No deep imports across modules; only public surfaces/contract usage.
-- SemVer bump only when OpenAPI changes; Conventional Commits.
+- `registry.yaml` updated; manifests exist; OpenAPI path present.
+- **Same-process use = in-process port**; **HTTP only cross-process**.
+- No deep imports; only public surfaces/contract usage.
+- SemVer bump only when **public surface** changes (OpenAPI or in-process port); Conventional Commits.

@@ -56,3 +56,26 @@ class ErrorResponse(BaseModel):
     detail: str
     type: str | None = None
     status: int | None = None
+
+
+class Problem(BaseModel):
+    """RFC 7807 Problem Details for HTTP APIs."""
+
+    type: str = Field(
+        default="about:blank",
+        description="A URI reference that identifies the problem type"
+    )
+    title: str = Field(
+        description="A short, human-readable summary of the problem type"
+    )
+    status: int = Field(
+        description="The HTTP status code"
+    )
+    detail: str | None = Field(
+        default=None,
+        description="A human-readable explanation specific to this occurrence"
+    )
+    instance: str | None = Field(
+        default=None,
+        description="A URI reference that identifies the specific occurrence"
+    )

@@ -1,0 +1,27 @@
+openapi: 3.1.0
+info:
+  title: AI Life Backend
+  description: Goals API
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+      required:
+        - title
+        - status
+      additionalProperties: true
