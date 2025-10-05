@@ -34,7 +34,7 @@ services:
         condition: service_healthy
     ports:
       - "${BACKEND_PORT}:8000"
-    command: ["bash", "-lc", "echo 'backend waiting (no server yet)'; tail -f /dev/null"]
+    command: ["bash", "-lc", "uv run uvicorn ai_life_backend.app:app --host 0.0.0.0 --port 8000 --reload"]
 
   frontend:
     build:

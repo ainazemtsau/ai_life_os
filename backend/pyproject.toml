@@ -8,7 +8,14 @@ version = "0.1.0"
 description = "AI Life OS backend (MVP)"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []  # keep runtime deps empty for MVP
+dependencies = [
+    "alembic>=1.13.0",
+    "asyncpg>=0.29.0",
+    "fastapi[standard]>=0.115.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+]  # keep runtime deps empty for MVP
 
 [project.optional-dependencies]
 dev = [
@@ -58,3 +65,10 @@ ignore_missing_imports = true
 minversion = "8.0"
 addopts = "-q"
 testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+]

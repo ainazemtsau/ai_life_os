@@ -10,7 +10,14 @@
       "Bash(.specify/scripts/bash/setup-plan.sh:*)",
       "Bash(.specify/scripts/bash/update-agent-context.sh:*)",
       "Bash(python3:*)",
-      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)"
+      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
+      "Bash(docker-compose:*)",
+      "Bash(uv add:*)",
+      "Bash(uv run:*)",
+      "Bash(backend/uv run python:*)",
+      "Bash(DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5432/ai_life_os\" uv run alembic upgrade head)",
+      "Bash(pnpm run:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

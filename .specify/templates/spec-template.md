@@ -6,31 +6,43 @@
 **Input**: User description: "$ARGUMENTS"
 
 ## Execution Flow (main)
-```
-1. Parse user description from Input
-   → If empty: ERROR "No feature description provided"
-2. Extract key concepts from description
-   → Identify: actors, actions, data, constraints
-3. For each unclear aspect:
-   → Mark with [NEEDS CLARIFICATION: specific question]
-4. Fill User Scenarios & Testing section
-   → If no clear user flow: ERROR "Cannot determine user scenarios"
-5. Generate Functional Requirements
-   → Each requirement must be testable
-   → Mark ambiguous requirements
-6. Identify Key Entities (if data involved)
-7. Run Review Checklist
-   → If any [NEEDS CLARIFICATION]: WARN "Spec has uncertainties"
-   → If implementation details found: ERROR "Remove tech details"
-8. Return: SUCCESS (spec ready for planning)
-```
+Parse user description from Input
+→ If empty: ERROR "No feature description provided"
+
+Extract key concepts from description
+→ Identify: actors, actions, data, constraints
+
+For each unclear aspect:
+→ Mark with [NEEDS CLARIFICATION: specific question]
+
+Fill User Scenarios & Testing section
+→ If no clear user flow: ERROR "Cannot determine user scenarios"
+
+Generate Functional Requirements
+→ Use normative wording (MUST / SHOULD / MAY)
+
+Identify Key Entities (if data involved)
+
+Normalize the document
+→ Remove stray control/garbled characters
+→ Ensure Acceptance Scenarios are numbered 1..N (sub-cases: 2.1, 2.2)
+
+Run Review Checklist
+→ If any [NEEDS CLARIFICATION]: WARN "Spec has uncertainties"
+→ If implementation details found: ERROR "Remove tech details"
+
+Return: SUCCESS (spec ready for planning)
+
+markdown
+Копировать код
 
 ---
 
 ## ⚡ Quick Guidelines
-- ✅ Focus on WHAT users need and WHY
-- ❌ Avoid HOW to implement (no tech stack, APIs, code structure)
+- ✅ Focus on **WHAT** users need and **WHY**
+- ❌ Avoid **HOW** to implement (no tech stack, APIs, code structure)
 - 👥 Written for business stakeholders, not developers
+- 🧭 Use **clear, testable** language (MUST / SHOULD / MAY)
 
 ### Section Requirements
 - **Mandatory sections**: Must be completed for every feature
@@ -39,16 +51,17 @@
 
 ### For AI Generation
 When creating this spec from a user prompt:
-1. **Mark all ambiguities**: Use [NEEDS CLARIFICATION: specific question] for any assumption you'd need to make
-2. **Don't guess**: If the prompt doesn't specify something (e.g., "login system" without auth method), mark it
-3. **Think like a tester**: Every vague requirement should fail the "testable and unambiguous" checklist item
-4. **Common underspecified areas**:
+1. **Mark ambiguities** with `[NEEDS CLARIFICATION: ...]`
+2. **Don't guess** missing policies; propose a short recommended default **inside** the clarification (e.g., “recommended UUIDv4”)
+3. **Think like a tester**: each requirement must be **verifiable**
+4. Common underspecified areas:
    - User types and permissions
-   - Data retention/deletion policies  
+   - Data retention/deletion policies
    - Performance targets and scale
    - Error handling behaviors
    - Integration requirements
    - Security/compliance needs
+   - **Data formats (IDs, timestamps), sorting field/order**
 
 ---
 
@@ -60,26 +73,35 @@ When creating this spec from a user prompt:
 ### Acceptance Scenarios
 1. **Given** [initial state], **When** [action], **Then** [expected outcome]
 2. **Given** [initial state], **When** [action], **Then** [expected outcome]
+2.1 **Given** [variant setup], **When** [action], **Then** [expected outcome]  
+> Use **sequential numbering**. For variants use dotted numbering (`2.1`, `2.2`). Use “Given / When / Then” phrases.
 
 ### Edge Cases
 - What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- How does the system handle [error scenario]?
+- What happens when no records match a filter?
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
-- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-001**: System **MUST** [specific capability, e.g., "allow users to create items"]
+- **FR-002**: System **MUST** [validation, e.g., "reject empty titles"]
+- **FR-003**: Users **MUST** be able to [key interaction]
+- **FR-004**: System **MUST** [persistence or behavior]
+- **FR-005**: System **SHOULD** [non-critical but desired behavior]
 
-*Example of marking unclear requirements:*
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+*Unclear examples (keep as clarifications, not guesses):*
+- **FR-0XX**: System **MUST** authenticate users via [NEEDS CLARIFICATION: method not specified]
+- **FR-0XY**: System **MUST** retain data for [NEEDS CLARIFICATION: retention period not specified]
+
+### Conventions & Formats *(include if data/APIs involved)*
+- **Identifiers:** [NEEDS CLARIFICATION: preferred `UUIDv4`?]  
+- **Timestamps:** [NEEDS CLARIFICATION: preferred `RFC 3339` in UTC?]  
+- **Sorting (if applicable):** [NEEDS CLARIFICATION: specify field + order, e.g., `date_updated DESC` within groups]  
+- **API error format (if HTTP):** [NEEDS CLARIFICATION: use structured “Problem Details” per RFC 7807?]
 
 ### Key Entities *(include if feature involves data)*
-- **[Entity 1]**: [What it represents, key attributes without implementation]
+- **[Entity 1]**: [What it represents, key attributes (no implementation details)]
 - **[Entity 2]**: [What it represents, relationships to other entities]
 
 ---
@@ -92,13 +114,16 @@ When creating this spec from a user prompt:
 - [ ] Focused on user value and business needs
 - [ ] Written for non-technical stakeholders
 - [ ] All mandatory sections completed
+- [ ] **No stray characters; grammar and bullets normalized**
 
 ### Requirement Completeness
-- [ ] No [NEEDS CLARIFICATION] markers remain
-- [ ] Requirements are testable and unambiguous  
-- [ ] Success criteria are measurable
+- [ ] No `[NEEDS CLARIFICATION]` markers remain (or they are justified for handoff)
+- [ ] Requirements are **testable and unambiguous**  
+- [ ] Success criteria are **measurable**
 - [ ] Scope is clearly bounded
 - [ ] Dependencies and assumptions identified
+- [ ] **Acceptance scenarios numbered 1..N; sub-cases 2.1, 2.2**
+- [ ] **If data/APIs present:** ID format, timestamp format, and (if used) sorting **field+order** are specified or explicitly marked as `[NEEDS CLARIFICATION]`
 
 ---
 
@@ -112,5 +137,3 @@ When creating this spec from a user prompt:
 - [ ] Requirements generated
 - [ ] Entities identified
 - [ ] Review checklist passed
-
----

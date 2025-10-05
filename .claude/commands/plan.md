@@ -1,5 +1,5 @@
 ---
-description: Execute the implementation planning workflow using the plan template to generate design artifacts.
+description: Execute the LEAN implementation planning workflow (short tech plan + module boundaries + single-source contracts).
 ---
 
 The user input to you can be provided directly by the agent or as a command argument - you **MUST** consider it before proceeding with the prompt (if not empty).
@@ -10,34 +10,33 @@ $ARGUMENTS
 
 Given the implementation details provided as an argument, do this:
 
-1. Run `.specify/scripts/bash/setup-plan.sh --json` from the repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. All future file paths must be absolute.
-   - BEFORE proceeding, inspect FEATURE_SPEC for a `## Clarifications` section with at least one `Session` subheading. If missing or clearly ambiguous areas remain (vague adjectives, unresolved critical choices), PAUSE and instruct the user to run `/clarify` first to reduce rework. Only continue if: (a) Clarifications exist OR (b) an explicit user override is provided (e.g., "proceed without clarification"). Do not attempt to fabricate clarifications yourself.
-2. Read and analyze the feature specification to understand:
-   - The feature requirements and user stories
-   - Functional and non-functional requirements
-   - Success criteria and acceptance criteria
-   - Any technical constraints or dependencies mentioned
+1. Run `.specify/scripts/bash/setup-plan.sh --json` and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. All paths must be absolute.
+   - BEFORE proceeding, check FEATURE_SPEC has a `## Clarifications` section or explicit user override to proceed without clarifications.
 
-3. Read the constitution at `.specify/memory/constitution.md` to understand constitutional requirements.
+2. Read:
+   - FEATURE_SPEC (requirements, acceptance)
+   - `.specify/memory/constitution.md`
 
-4. Execute the implementation plan template:
-   - Load `.specify/templates/plan-template.md` (already copied to IMPL_PLAN path)
-   - Set Input path to FEATURE_SPEC
-   - Run the Execution Flow (main) function steps 1-9
-   - The template is self-contained and executable
-   - Follow error handling and gate checks as specified
-   - Let the template guide artifact generation in $SPECS_DIR:
-     * Phase 0 generates research.md
-     * Phase 1 generates data-model.md, contracts/, quickstart.md
-     * Phase 2 generates tasks.md
-   - Incorporate user-provided details from arguments into Technical Context: $ARGUMENTS
-   - Update Progress Tracking as you complete each phase
+3. Execute the LEAN plan template:
+   - Load `.specify/templates/plan-template.md` (copied to IMPL_PLAN path).
+   - Input path = FEATURE_SPEC.
+   - **Do NOT generate** `research.md`, `data-model.md`, `quickstart.md`.
+   - **Generate/update** only:
+     * `plan.md` (short tech plan)
+     * `.specify/memory/public/registry.yaml`
+     * `.specify/memory/public/*.api.md` (minimal manifests for each module)
+     * Backend HTTP **OpenAPI** file at `backend/.../contracts/<feature>_openapi.(yaml|json)` (single source of truth)
+   - Frontend contracts: **none** (types/SDK are generated later from OpenAPI).
 
-5. Verify execution completed:
-   - Check Progress Tracking shows all phases complete
-   - Ensure all required artifacts were generated
-   - Confirm no ERROR states in execution
+4. Validate docs-as-code gates:
+   ```bash
+   python .specify/scripts/registry_validate.py
+   python .specify/scripts/manifest_lint.py
+   ```
+Completion check:
 
-6. Report results with branch name, file paths, and generated artifacts.
+plan.md exists and contains: module map, public surfaces table, OpenAPI path, vertical steps.
 
-Use absolute paths with the repository root for all file operations to avoid path issues.
+registry.yaml updated; manifests exist; OpenAPI path present for each HTTP module.
+
+Report results with branch name, absolute file paths, and generated artifacts.

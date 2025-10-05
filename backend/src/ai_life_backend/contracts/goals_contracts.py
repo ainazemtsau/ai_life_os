@@ -1,83 +1,69 @@
 """
-Public API Contract: backend.goals
+Goals Module - Public Contract (Protocol Definitions)
 Version: 0.1.0
 
-Protocol definitions for Goals Management module.
-Defines repository and service interfaces for dependency inversion.
+This contract defines the repository interface that must be implemented
+by any concrete repository for the goals module.
 """
 
 from typing import Protocol
 from uuid import UUID
-from datetime import datetime
-
-
-class Goal(Protocol):
-    """
-    Domain entity representing a personal goal.
-
-    Immutable value object with auto-generated timestamps.
-    """
-
-    id: UUID
-    title: str  # 1-255 characters, non-empty after trim
-    is_done: bool  # Completion status
-    date_created: datetime  # ISO 8601 with timezone
-    date_updated: datetime  # ISO 8601 with timezone, refreshed on any modification
+from ai_life_backend.goals.domain import Goal
 
 
 class GoalRepository(Protocol):
     """
     Repository interface for Goal persistence.
 
-    All methods are async for compatibility with asyncio/asyncpg.
-    Implementations must handle database errors and convert to domain exceptions.
+    All implementations must provide these async methods.
     """
 
     async def create(self, title: str) -> Goal:
         """
-        Create a new goal with auto-generated id and timestamps.
+        Create a new goal.
 
         Args:
-            title: Goal title (1-255 chars, non-empty after trim)
+            title: Goal title (1-255 characters, non-empty after trim)
 
         Returns:
-            Created Goal entity
+            Created Goal entity with generated ID and timestamps
 
         Raises:
-            ValueError: If title is invalid (empty, too long)
+            ValueError: If title is empty or exceeds 255 characters
         """
         ...
 
     async def get_by_id(self, goal_id: UUID) -> Goal | None:
         """
-        Retrieve goal by UUID.
+        Retrieve a single goal by ID.
 
         Args:
-            goal_id: Unique goal identifier
+            goal_id: UUID of the goal
 
         Returns:
-            Goal if found, None otherwise
+            Goal entity if found, None otherwise
         """
         ...
 
     async def list_all(self) -> list[Goal]:
         """
-        List all goals, sorted by (is_done ASC, date_updated DESC).
+        List all goals.
 
         Returns:
-            List of goals (active first, then done; within each group, most recent first)
+            List of all goals, sorted by is_done ASC, date_updated DESC
+            (active goals first, most recently updated first)
         """
         ...
 
     async def list_by_status(self, is_done: bool) -> list[Goal]:
         """
-        List goals filtered by completion status, sorted by date_updated DESC.
+        List goals filtered by completion status.
 
         Args:
             is_done: True for completed goals, False for active goals
 
         Returns:
-            Filtered list of goals (most recent first)
+            List of matching goals, sorted by date_updated DESC
         """
         ...
 
@@ -85,73 +71,36 @@ class GoalRepository(Protocol):
         self,
         goal_id: UUID,
         title: str | None = None,
-        is_done: bool | None = None,
+        is_done: bool | None = None
     ) -> Goal | None:
         """
-        Update goal fields and refresh date_updated.
-
-        At least one of title or is_done must be provided.
+        Update a goal's title and/or completion status.
 
         Args:
-            goal_id: Goal to update
-            title: New title (optional, 1-255 chars if provided)
+            goal_id: UUID of the goal to update
+            title: New title (optional)
             is_done: New completion status (optional)
 
         Returns:
-            Updated Goal if found and updated, None if not found
+            Updated Goal entity if found, None if goal doesn't exist
 
         Raises:
-            ValueError: If title is invalid or no fields provided
+            ValueError: If title is empty or exceeds 255 characters
+            ValueError: If no fields provided for update
         """
         ...
 
     async def delete(self, goal_id: UUID) -> bool:
         """
-        Permanently delete a goal.
+        Delete a goal permanently.
 
         Args:
-            goal_id: Goal to delete
+            goal_id: UUID of the goal to delete
 
         Returns:
-            True if goal was deleted, False if goal was not found
+            True if goal was deleted, False if goal not found
         """
         ...
 
 
-class GoalService(Protocol):
-    """
-    Service interface for Goal business logic.
-
-    Orchestrates repository calls and enforces business rules.
-    Thin service layer for MVP (mostly delegates to repository).
-    """
-
-    async def create_goal(self, title: str) -> Goal:
-        """Create a new goal."""
-        ...
-
-    async def get_goal(self, goal_id: UUID) -> Goal | None:
-        """Get a single goal by ID."""
-        ...
-
-    async def list_goals(self, status_filter: str | None = None) -> list[Goal]:
-        """
-        List goals with optional status filter.
-
-        Args:
-            status_filter: 'active', 'done', or None for all
-        """
-        ...
-
-    async def update_goal(
-        self,
-        goal_id: UUID,
-        title: str | None = None,
-        is_done: bool | None = None,
-    ) -> Goal | None:
-        """Update a goal's title and/or completion status."""
-        ...
-
-    async def delete_goal(self, goal_id: UUID) -> bool:
-        """Delete a goal permanently."""
-        ...
+__all__ = ["GoalRepository"]
