@@ -1,4 +1,5 @@
 """PostgreSQL implementation of GoalRepository."""
+
 from typing import cast
 from uuid import UUID
 from datetime import datetime, timezone
@@ -10,13 +11,13 @@ from ai_life_backend.goals.domain import Goal
 metadata = MetaData()
 
 goals_table = Table(
-    'goals',
+    "goals",
     metadata,
-    Column('id', PG_UUID(as_uuid=True), primary_key=True),
-    Column('title', String(255), nullable=False),
-    Column('is_done', Boolean, nullable=False),
-    Column('date_created', DateTime(timezone=True), nullable=False),
-    Column('date_updated', DateTime(timezone=True), nullable=False),
+    Column("id", PG_UUID(as_uuid=True), primary_key=True),
+    Column("title", String(255), nullable=False),
+    Column("is_done", Boolean, nullable=False),
+    Column("date_created", DateTime(timezone=True), nullable=False),
+    Column("date_updated", DateTime(timezone=True), nullable=False),
 )
 
 
@@ -49,9 +50,7 @@ class PostgresGoalRepository:
     async def get_by_id(self, goal_id: UUID) -> Goal | None:
         """Retrieve goal by ID."""
         async with self._engine.connect() as conn:
-            result = await conn.execute(
-                select(goals_table).where(goals_table.c.id == goal_id)
-            )
+            result = await conn.execute(select(goals_table).where(goals_table.c.id == goal_id))
             row = result.one_or_none()
             if not row:
                 return None
@@ -67,10 +66,18 @@ class PostgresGoalRepository:
         """List all goals, sorted by is_done ASC, date_updated DESC."""
         async with self._engine.connect() as conn:
             result = await conn.execute(
-                select(goals_table).order_by(goals_table.c.is_done, goals_table.c.date_updated.desc())
+                select(goals_table).order_by(
+                    goals_table.c.is_done, goals_table.c.date_updated.desc()
+                )
             )
             return [
-                Goal(id=row.id, title=row.title, is_done=row.is_done, date_created=row.date_created, date_updated=row.date_updated)
+                Goal(
+                    id=row.id,
+                    title=row.title,
+                    is_done=row.is_done,
+                    date_created=row.date_created,
+                    date_updated=row.date_updated,
+                )
                 for row in result.all()
             ]
 
@@ -83,7 +90,13 @@ class PostgresGoalRepository:
                 .order_by(goals_table.c.date_updated.desc())
             )
             return [
-                Goal(id=row.id, title=row.title, is_done=row.is_done, date_created=row.date_created, date_updated=row.date_updated)
+                Goal(
+                    id=row.id,
+                    title=row.title,
+                    is_done=row.is_done,
+                    date_created=row.date_created,
+                    date_updated=row.date_updated,
+                )
                 for row in result.all()
             ]
 
@@ -103,7 +116,7 @@ class PostgresGoalRepository:
             if len(title) > 255:
                 raise ValueError("Title cannot exceed 255 characters")
 
-        update_values: dict = {"date_updated": datetime.now(timezone.utc)}
+        update_values: dict = {"date_updated": datetime.now(timezone.UTC)}
         if title is not None:
             update_values["title"] = title
         if is_done is not None:
@@ -130,7 +143,5 @@ class PostgresGoalRepository:
     async def delete(self, goal_id: UUID) -> bool:
         """Permanently delete a goal."""
         async with self._engine.begin() as conn:
-            result = await conn.execute(
-                delete(goals_table).where(goals_table.c.id == goal_id)
-            )
+            result = await conn.execute(delete(goals_table).where(goals_table.c.id == goal_id))
             return result.rowcount > 0

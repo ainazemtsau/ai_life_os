@@ -1,4 +1,5 @@
 """FastAPI router for Goals API."""
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid import UUID
 from typing import Literal
@@ -12,13 +13,13 @@ router = APIRouter(prefix="/goals", tags=["goals"])
 def get_repository() -> PostgresGoalRepository:
     """Dependency injection for repository."""
     from ai_life_backend.database import get_engine
+
     return PostgresGoalRepository(get_engine())
 
 
 @router.post("", response_model=GoalResponse, status_code=201)
 async def create_goal(
-    request: GoalCreateRequest,
-    repo: PostgresGoalRepository = Depends(get_repository)
+    request: GoalCreateRequest, repo: PostgresGoalRepository = Depends(get_repository)
 ) -> GoalResponse:
     """Create a new goal."""
     try:
@@ -31,7 +32,7 @@ async def create_goal(
 @router.get("", response_model=GoalListResponse)
 async def list_goals(
     status: Literal["active", "done"] | None = Query(None),
-    repo: PostgresGoalRepository = Depends(get_repository)
+    repo: PostgresGoalRepository = Depends(get_repository),
 ) -> GoalListResponse:
     """List all goals with optional status filter."""
     if status == "active":
@@ -46,8 +47,7 @@ async def list_goals(
 
 @router.get("/{goal_id}", response_model=GoalResponse)
 async def get_goal(
-    goal_id: UUID,
-    repo: PostgresGoalRepository = Depends(get_repository)
+    goal_id: UUID, repo: PostgresGoalRepository = Depends(get_repository)
 ) -> GoalResponse:
     """Get a single goal by ID."""
     goal = await repo.get_by_id(goal_id)
@@ -60,7 +60,7 @@ async def get_goal(
 async def update_goal(
     goal_id: UUID,
     request: GoalUpdateRequest,
-    repo: PostgresGoalRepository = Depends(get_repository)
+    repo: PostgresGoalRepository = Depends(get_repository),
 ) -> GoalResponse:
     """Update a goal's title and/or completion status."""
     if request.title is None and request.is_done is None:
@@ -77,8 +77,7 @@ async def update_goal(
 
 @router.delete("/{goal_id}", status_code=204)
 async def delete_goal(
-    goal_id: UUID,
-    repo: PostgresGoalRepository = Depends(get_repository)
+    goal_id: UUID, repo: PostgresGoalRepository = Depends(get_repository)
 ) -> None:
     """Delete a goal permanently."""
     success = await repo.delete(goal_id)

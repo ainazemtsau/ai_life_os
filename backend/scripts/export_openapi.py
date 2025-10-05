@@ -1,31 +1,42 @@
 #!/usr/bin/env python3
-"""Export OpenAPI schema from FastAPI application."""
+"""Export OpenAPI schema from the FastAPI application (code is the single source of truth)."""
+
+from __future__ import annotations
 import json
 import sys
 from pathlib import Path
 
-# Add backend src to path
-backend_src = Path(__file__).parent.parent / "src"
-sys.path.insert(0, str(backend_src))
+# Ensure backend/src is importable
+ROOT = Path(__file__).resolve().parents[1]        # .../backend
+SRC = ROOT / "src"
+sys.path.insert(0, str(SRC))
 
-from ai_life_backend.app import app
+# Optional YAML support
+try:
+    import yaml  # pip install pyyaml
+except Exception:
+    yaml = None  # we'll fall back to JSON if PyYAML isn't present
 
+# Import FastAPI app
+try:
+    from ai_life_backend.app import app  # app.openapi() will produce the schema
+except ModuleNotFoundError as e:
+    missing = str(e).split("'")[1]
+    print(f"[ERROR] Missing Python package: {missing}")
+    print("Fix: activate your project virtualenv and install FastAPI, e.g.:")
+    print("  python3 -m venv .venv && source .venv/bin/activate")
+    print('  pip install "fastapi" pyyaml')
+    sys.exit(1)
 
-def export_openapi() -> None:
-    """Export OpenAPI schema to YAML format."""
-    # Get OpenAPI schema
-    openapi_schema = app.openapi()
-
-    # Output path
-    output_path = Path(__file__).parent.parent / "src" / "ai_life_backend" / "contracts" / "goals_openapi.json"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Write JSON (easier to ensure formatting)
-    with open(output_path, "w") as f:
-        json.dump(openapi_schema, f, indent=2)
-
-    print(f"✓ OpenAPI schema exported to: {output_path}")
-
+def export_openapi(out_path: Path) -> None:
+    schema = app.openapi()  # FastAPI official way to get OpenAPI schema
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    if out_path.suffix.lower() in {".yml", ".yaml"} and yaml is not None:
+        out_path.write_text(yaml.safe_dump(schema, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    else:
+        out_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
 
 if __name__ == "__main__":
-    export_openapi()
+    out = ROOT / "src" / "ai_life_backend" / "contracts" / "goals_openapi.yaml"
+    export_openapi(out)
+    print(f"✓ OpenAPI schema exported to: {out}")

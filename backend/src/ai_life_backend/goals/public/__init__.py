@@ -1,28 +1,32 @@
-"""Public API for backend.goals module - in-process port."""
+"""Public API for backend.goals module — in-process port + HTTP router wrapper."""
+
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from ..api.routes import router as goals_router
+from fastapi import APIRouter
+
+# Import FastAPI Problem schema model (your RFC7807 model)
+from ai_life_backend.errors.models import Problem
+
+# Internal router with actual endpoints (prefix/tags defined inside)
+from ..api.routes import router as _internal_router
+from ai_life_backend.core.httpkit import make_public_router
 from ..domain import Goal
 from ..repository.postgres_goal_repository import PostgresGoalRepository
+
+
+# ---------- In-process DTO & read-only port ----------
 
 
 @dataclass(frozen=True)
 class GoalDTO:
     """
-    Data Transfer Object for Goal entity.
-
-    Read-only DTO for same-process consumers. Does not expose ORM models.
-
-    Attributes:
-        id: Unique identifier (UUID)
-        title: Goal description
-        is_done: Completion status
-        date_created: Creation timestamp (UTC)
-        date_updated: Last modification timestamp (UTC)
+    Read-only Data Transfer Object for same-process consumers.
+    Does not expose ORM models.
     """
+
     id: UUID
     title: str
     is_done: bool
@@ -31,7 +35,6 @@ class GoalDTO:
 
     @staticmethod
     def from_domain(goal: Goal) -> "GoalDTO":
-        """Convert domain Goal to DTO."""
         return GoalDTO(
             id=goal.id,
             title=goal.title,
@@ -41,62 +44,38 @@ class GoalDTO:
         )
 
 
-async def list_goals(status: Literal['all', 'active', 'done'] = 'all') -> list[GoalDTO]:
+async def list_goals(status: Literal["all", "active", "done"] = "all") -> list[GoalDTO]:
     """
     List goals with optional status filter (read-only).
-
-    Returns goals ordered by: active first, then by date_updated DESC.
-
-    Args:
-        status: Filter by status - 'all', 'active' (not done), or 'done'
-
-    Returns:
-        List of GoalDTO objects
-
-    Raises:
-        RuntimeError: If database connection fails
+    Ordering: active first, then by date_updated DESC.
     """
     from ai_life_backend.database import get_engine
 
     repo = PostgresGoalRepository(get_engine())
-
-    if status == 'active':
+    if status == "active":
         goals = await repo.list_by_status(False)
-    elif status == 'done':
+    elif status == "done":
         goals = await repo.list_by_status(True)
-    else:  # 'all'
+    else:
         goals = await repo.list_all()
 
     return [GoalDTO.from_domain(g) for g in goals]
 
 
 async def get_goal(id: UUID) -> GoalDTO | None:
-    """
-    Retrieve a single goal by ID (read-only).
-
-    Args:
-        id: Goal UUID
-
-    Returns:
-        GoalDTO if found, None otherwise
-
-    Raises:
-        RuntimeError: If database connection fails
-    """
+    """Retrieve a single goal by ID (read-only)."""
     from ai_life_backend.database import get_engine
 
     repo = PostgresGoalRepository(get_engine())
     goal = await repo.get_by_id(id)
+    return None if goal is None else GoalDTO.from_domain(goal)
 
-    if goal is None:
-        return None
 
-    return GoalDTO.from_domain(goal)
-
+goals_router = make_public_router(_internal_router)
 
 __all__ = [
-    "goals_router",  # HTTP/FastAPI (cross-process)
-    "GoalDTO",       # In-process DTO
-    "list_goals",    # In-process read function
-    "get_goal",      # In-process read function
+    "goals_router",  # HTTP/FastAPI (cross-process; included in app with prefix="/api")
+    "GoalDTO",  # In-process DTO
+    "list_goals",  # In-process read function
+    "get_goal",  # In-process read function
 ]

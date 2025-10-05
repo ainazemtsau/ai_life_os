@@ -10,6 +10,19 @@ modules:
       - frontend/src/features/design/**
     uses: ["-"]
     notes: 'Design System; import only from the root entrypoint'
+   
+  backend.core:
+    kind: python
+    semver: 0.1.0
+    manifest: .specify/memory/public/backend.core.api.md
+    contract: "-"  # нет HTTP-контракта; поставщик in-process утилит
+    import_hint: from ai_life_backend.core.httpkit import make_public_router
+    allowed_dirs:
+      - backend/src/ai_life_backend/core/**
+      - backend/tests/core/**
+    uses: ["-"]
+    notes: "Cross-cutting utilities: Problem (RFC7807), exception handlers, router wrapper. No domain logic."
+
 
   backend.goals:
     kind: python

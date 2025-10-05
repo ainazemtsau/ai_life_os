@@ -68,10 +68,7 @@ class GoalRepository(Protocol):
         ...
 
     async def update(
-        self,
-        goal_id: UUID,
-        title: str | None = None,
-        is_done: bool | None = None
+        self, goal_id: UUID, title: str | None = None, is_done: bool | None = None
     ) -> Goal | None:
         """
         Update a goal's title and/or completion status.

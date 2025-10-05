@@ -1,11 +1,347 @@
 openapi: 3.1.0
 info:
-  title: AI Life Backend
-  description: Goals API
+  title: AI Life OS API
+  description: Goals Management MVP - Backend API
   version: 0.1.0
-paths: {}
+  license:
+    name: Proprietary (internal)
+paths:
+  /api/goals:
+    post:
+      tags:
+      - goals
+      - goals
+      summary: Create Goal
+      description: Create a new goal.
+      operationId: create_goal_api_goals_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalCreateRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      tags:
+      - goals
+      - goals
+      summary: List Goals
+      description: List all goals with optional status filter.
+      operationId: list_goals_api_goals_get
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - active
+            - done
+            type: string
+          - type: 'null'
+          title: Status
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalListResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /api/goals/{goal_id}:
+    get:
+      tags:
+      - goals
+      - goals
+      summary: Get Goal
+      description: Get a single goal by ID.
+      operationId: get_goal_api_goals__goal_id__get
+      parameters:
+      - name: goal_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Goal Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    patch:
+      tags:
+      - goals
+      - goals
+      summary: Update Goal
+      description: Update a goal's title and/or completion status.
+      operationId: update_goal_api_goals__goal_id__patch
+      parameters:
+      - name: goal_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Goal Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - goals
+      - goals
+      summary: Delete Goal
+      description: Delete a goal permanently.
+      operationId: delete_goal_api_goals__goal_id__delete
+      parameters:
+      - name: goal_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Goal Id
+      responses:
+        '204':
+          description: Successful Response
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /health:
+    get:
+      tags:
+      - health
+      summary: Health Check
+      operationId: health_check_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Check Health Get
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
 components:
   schemas:
+    GoalCreateRequest:
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Title
+      type: object
+      required:
+      - title
+      title: GoalCreateRequest
+      description: Request schema for creating a goal.
+    GoalListResponse:
+      properties:
+        goals:
+          items:
+            $ref: '#/components/schemas/GoalResponse'
+          type: array
+          title: Goals
+      type: object
+      required:
+      - goals
+      title: GoalListResponse
+      description: Response schema for list of goals.
+    GoalResponse:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        title:
+          type: string
+          title: Title
+        is_done:
+          type: boolean
+          title: Is Done
+        date_created:
+          type: string
+          format: date-time
+          title: Date Created
+        date_updated:
+          type: string
+          format: date-time
+          title: Date Updated
+      type: object
+      required:
+      - id
+      - title
+      - is_done
+      - date_created
+      - date_updated
+      title: GoalResponse
+      description: Response schema for a goal.
+    GoalUpdateRequest:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 255
+            minLength: 1
+          - type: 'null'
+          title: Title
+        is_done:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Done
+      type: object
+      title: GoalUpdateRequest
+      description: Request schema for updating a goal.
     Problem:
       type: object
       properties:
@@ -22,6 +358,15 @@ components:
           type: string
           format: uri
       required:
-        - title
-        - status
+      - title
+      - status
       additionalProperties: true
+servers:
+- url: http://localhost:8000
+  description: Local dev
+security: []
+tags:
+- name: goals
+  description: Goals management endpoints
+- name: health
+  description: Health checks
