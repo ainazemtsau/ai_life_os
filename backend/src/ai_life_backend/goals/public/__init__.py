@@ -13,7 +13,7 @@ from ai_life_backend.contracts.core_protocols import (
     RFC7807_MIME,
     ProblemDict,
 )
-from ai_life_backend.core.httpkit import make_public_router
+from ai_life_backend.core.public import make_public_router
 from ai_life_backend.database import get_engine
 from ai_life_backend.goals.api.routes import router as _internal_router
 from ai_life_backend.goals.domain import Goal

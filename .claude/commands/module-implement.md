@@ -61,14 +61,15 @@ Steps
         * Note change in manifest and prepare Conventional Commit with `[public-api]`.
 
 5) Keepers of quality (local)
-   - For Python modules:
-     * `pytest -q backend/tests/<module>` (or module-scoped tests path)
-     * `ruff check backend/src/ai_life_backend/<module>/`
-     * `mypy backend/src/ai_life_backend/<module>/`
-   - For TypeScript modules:
-     * `pnpm lint` or `npm run lint` scoped to module paths
-     * `tsc -p tsconfig.json` (ensure no TS errors in module paths)
-   - Do not run repo-wide heavy jobs unless necessary.
+   - Use the project's Makefile `qa` target for quality checks:
+     * For backend modules: `cd backend && make qa`
+     * For frontend modules: `cd frontend && make qa`
+   - The `make qa` command runs:
+     * Format + lint fixes + lint check
+     * Type checking (mypy/tsc)
+     * Tests (pytest/vitest)
+     * Coverage reports (for backend)
+   - This ensures consistent quality checks across all modules.
 
 6) Contracts (if applicable)
    - HTTP: ensure `backend/scripts/export_openapi.py` (or equivalent) regenerates the spec into `contract` path from registry.

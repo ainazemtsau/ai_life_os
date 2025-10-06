@@ -21,7 +21,15 @@
       "Bash(uv sync:*)",
       "Bash(make:*)",
       "Bash(npx eslint:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(pnpm --dir frontend run lint -- --fix)",
+      "Bash(pnpm --filter frontend run lint)",
+      "Bash(pnpm --filter frontend exec tsc --noEmit)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm --filter frontend run typecheck)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm lint:*)"
     ],
     "deny": [],
     "ask": []
