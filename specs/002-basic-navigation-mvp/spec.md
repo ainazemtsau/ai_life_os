@@ -89,8 +89,8 @@ As a user, I want to access a central Dashboard as the main entry point to the a
 ### Functional Requirements
 - **FR-001**: System MUST display a Dashboard page when users navigate to the root path ("/")
 - **FR-002**: Dashboard page MUST include a greeting message for the user
-- **FR-003**: Dashboard page MUST display placeholder information (descriptive content about the application or upcoming features)
-- **FR-004**: System MUST render the entire application in a dark theme by default (no light mode or theme switcher in this feature)
+- **FR-003**: Dashboard page MUST display placeholder information consisting of: (1) a brief welcome message explaining the application purpose, and (2) a short description of available and upcoming features
+- **FR-004**: System MUST render the entire application in a dark theme by default, using the dark color palette from the design system (no light mode or theme switcher in this feature). Dark theme means: dark background colors, light text for readability, and sufficient contrast ratios for accessibility
 - **FR-005**: Dashboard MUST provide a clear and visible navigation element (link or button) to access the Goals page
 - **FR-006**: Navigation element MUST direct users to the "/goals" route when activated
 - **FR-007**: Navigation from Dashboard to Goals MUST complete in a single user interaction (one click)
