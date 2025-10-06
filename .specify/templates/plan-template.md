@@ -6,20 +6,20 @@
 ---
 
 ## Purpose
-Freeze high-level design for this feature using **contracts-first**. Keep template logic-less: all module/data details are injected by the /plan runner.
+Freeze high-level design for this feature using **contracts-first**. The template is logic-less; the `/plan` runner injects all concrete details.
 
 ## Context & Constraints (from spec)
 [CONTEXT_SUMMARY]
 
-## Module Map (auto-generated)
+## Module Map (public surfaces only)
 [MODULE_API_MATRIX]
 
 > Only surfaces listed above are public. Everything else is private implementation.
 
 ## Contracts
-- HTTP contracts (OpenAPI 3.1) for modules that expose HTTP:  
+- HTTP contracts (OpenAPI 3.1), if any:  
 [HTTP_CONTRACTS_TABLE]
-- In-process ports (typed DTO/functions) for same-process consumption:  
+- In-process ports (TS `.d.ts` / Python Protocols), if any:  
 [INPROC_PORTS_TABLE]
 
 ## Vertical Steps (outline)
@@ -32,3 +32,9 @@ Freeze high-level design for this feature using **contracts-first**. Keep templa
 
 ## Risks/Notes
 [NOTES]
+
+## Machine-readable Scope
+<!-- TARGET_MODULES:BEGIN
+[TBD by /plan runner]
+TARGET_MODULES:END -->
+<!-- ROUTER_OWNER: [TBD or empty] -->

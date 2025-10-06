@@ -1,54 +1,86 @@
 ---
-description: Execute the planning workflow with a logic-less template; inject modules from registry.yaml.
+description: Execute the implementation planning workflow using the plan template; freeze contracts-first design and write a machine-readable scope (TARGET_MODULES + ROUTER_OWNER) for downstream tools.
 ---
+
+The user input to you can be provided directly by the agent or as a command argument - you **MUST** consider it before proceeding with the prompt (if not empty).
 
 User input:
 
 $ARGUMENTS
 
-Steps:
+Goals
+- Generate `plan.md` from the template with clear, contracts-first decisions (no code).
+- Record an explicit, machine-readable scope inside `plan.md`:
+  - `TARGET_MODULES` — only the modules that will receive work in this feature.
+  - `ROUTER_OWNER` — the module that owns framework glue for routing (e.g., Next.js `app/`).
+- Keep the plan logic-less: the runner computes content; the template is declarative.
 
-1) Run `.specify/scripts/bash/setup-plan.sh --json` → parse { FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH }.
+Steps
 
-2) Ensure FEATURE_SPEC has a Clarifications section or user override.
+1) Run `.specify/scripts/bash/setup-plan.sh --json` from the repo root and parse:
+   - `FEATURE_SPEC`, `IMPL_PLAN`, `SPECS_DIR`, `BRANCH` (all future paths must be absolute)
 
-3) Read:
-   - FEATURE_SPEC (requirements/acceptance)
+2) Gate: Clarifications
+   - Load `FEATURE_SPEC` and check for `## Clarifications` with at least one `Session` subheading.
+   - If missing **and** ambiguities remain (vague adjectives, unresolved decisions), instruct the user to run `/clarify` first, unless they explicitly said "proceed without clarification".
+
+3) Analyze specification (high level only)
+   - Extract: user stories, functional/non-functional requirements, constraints (e.g., "frontend-only"), acceptance criteria.
+   - Derive environment constraints that matter to contracts (e.g., HTTP presence, data entities).
+
+4) Read project constitution:
    - `.specify/memory/constitution.md`
-   - `.specify/memory/public/registry.yaml`  ← single source of module truth
-4) Heuristics: Suggest design-spikes/ADRs when signals appear in FEATURE_SPEC or $ARGUMENTS:
-   - Scaling a concept to N>1 (e.g., multiple bots/providers/groups); need ports/registries/routers
-   - New cross-module consumers; need a public surface (in-process port or HTTP contract)
-   - Refactor for extensibility (strangler approach)
-   - Significant library/pattern/algorithm choice with trade-offs
-   - Performance/SLO/security concerns impacting design
+   - Enforce: Clean Code gates (SOLID/DRY/KISS), strict module boundaries, docs-as-code, SemVer, Conventional Commits.
 
-   If any signal is found, append a "Recommendations" section to IMPL_PLAN with concrete commands to run, e.g.:
-   - `/design-spike "Chatbot capability & routing model" timebox=2d`
-   - `/adr "Adopt ChatbotService port + Router" status=Proposed`
+5) Compute module partition (bounded contexts)
+   - Build a **Module Map**: public surfaces only; everything else is private internals.
+   - Decide **which modules actually get work in this feature** (these are the **TARGET_MODULES**).
+     Typical patterns for web:
+       * Create/extend `frontend.[feature]` for UI of this feature.
+       * Add/extend `frontend.app-shell` if routing/layout glue is needed (owner of `frontend/src/app/**`).
+       * Reuse `frontend.design`, `frontend.goals`, or backend modules as **context** (no work) unless the spec requires changes.
+     - Respect explicit constraints from the spec (e.g., "frontend-only" → do **not** include backend modules as targets).
 
-(Do not create files here; only suggest. Keep the template logic-less.)
-...
-(Optional) If you use a logic-less plan-template.md, add placeholders where suggestions should appear:
+6) Determine **ROUTER_OWNER**
+   - Prefer a module whose `allowed_dirs` include `frontend/src/app/**` (if present in registry).
+   - Else, if a module named `frontend.app-shell` is in the target set → use it.
+   - Else, omit and do not emit router integration steps (record rationale in notes).
 
-[SPIKE_RECOMMENDATIONS]
+7) Prepare plan content
+   - Load `.specify/templates/plan-template.md`.
+   - Fill placeholders:
+     - `[FEATURE]`, `[BRANCH]`, `[DATE]`, `[SPEC_PATH]`, `[FEATURE_SPEC_ABS]`
+     - `[CONTEXT_SUMMARY]` — short summary of constraints from the spec (no frameworks).
+     - `[MODULE_API_MATRIX]` — a table of **public** surfaces for **all modules relevant to the feature**, but **mark** which ones are **Target** vs **Context**. Use namespace import hints for frontend (e.g., `import * as dashboard from '@/features/dashboard'`).
+     - `[HTTP_CONTRACTS_TABLE]` — only modules that expose an HTTP surface (OpenAPI).
+     - `[INPROC_PORTS_TABLE]` — modules exposing in-process ports (TS `.d.ts` / Python Protocols).
+     - `[VERTICAL_STEPS]` — outline steps (e.g., create new frontend modules, define contracts, add router glue).
+     - `[NOTES]` — risks/trade-offs (e.g., keeping framework glue minimal in `app/`).
+   - Append a **machine-readable scope** section at the end of `plan.md`:
+     ```
+     ## Machine-readable Scope
+     <!-- TARGET_MODULES:BEGIN
+     <one module id per line, e.g.>
+     frontend.dashboard
+     frontend.app-shell
+     TARGET_MODULES:END -->
+     <!-- ROUTER_OWNER: frontend.app-shell -->
+     ```
 
-[ADR_RECOMMENDATIONS]
+8) Write `IMPL_PLAN` atomically.
 
+9) Validate output
+   - Ensure the Machine-readable Scope exists and lists **only** target modules.
+   - Ensure Module Map shows **public surfaces only**; no internal details.
+   - Ensure no code or framework internals leak into the plan.
 
-5) Build data for template placeholders:
-   - MODULE_API_MATRIX: iterate registry modules; include id/kind/provides/uses/manifest/contract/allowed_dirs/import_hint/semver.
-   - HTTP_CONTRACTS_TABLE: subset where `contract` points to OpenAPI file.
-   - INPROC_PORTS_TABLE: subset with in-process import_hint (no HTTP).
-   - CONTEXT_SUMMARY, VERTICAL_STEPS, NOTES: derive from spec + $ARGUMENTS.
+10) Report
+   - Print branch, plan path, and a summary:
+     - Target Modules
+     - Router Owner (if any)
+     - Contracts created/updated (if applicable)
+   - Next command suggestion: `/tasks`
 
-6) Render `.specify/templates/plan-template.md` into IMPL_PLAN by replacing placeholders:
-   [CONTEXT_SUMMARY], [MODULE_API_MATRIX], [HTTP_CONTRACTS_TABLE], [INPROC_PORTS_TABLE],
-   [VERTICAL_STEPS], [NOTES], [SPEC_PATH], [FEATURE_SPEC_ABS], [BRANCH], [DATE].
-
-7) Validate docs gates:
-   `python .specify/scripts/registry_validate.py`
-   `python .specify/scripts/manifest_lint.py`
-   (fail fast on errors)
-
-8) Report: branch, IMPL_PLAN path, generated sections. Use absolute paths.
+Notes
+- Do not fabricate technical stack choices; contracts-first means public surfaces, not framework picks.
+- Keep the plan short and crisp; all heavy details live in manifests/contracts later.

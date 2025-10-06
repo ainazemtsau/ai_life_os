@@ -1,45 +1,44 @@
-# Tasks: [FEATURE_NAME]
+# Tasks: [FEATURE NAME]
 
-**Branch**: `[BRANCH]` | **Date**: [DATE]  
-**Feature dir**: [FEATURE_DIR]
-
----
-
-## Module API Matrix (from registry.yaml)
-[MODULE_API_MATRIX]
-
-> Public surfaces only. Internals remain private to each module. Use only `import_hint` (in-process) or HTTP (OpenAPI).
+**Scope**: Target modules only (from plan.md Machine-readable Scope).  
+**Source**: plan.md + registry.yaml + spec.md.
 
 ---
 
-## Global Tasks (high-level; no file paths)
-[GLOBAL_TASKS]
-
-Guidelines:
-- Tag each item with `@module(<id>)` and priority `@prio(P1|P2|P3)`.
-- Mark `[P]` only if modules are independent.
-- **TDD-first**: write/declare tests before implementation. :contentReference[oaicite:6]{index=6}
-- Keep this section technology-agnostic; details live in module playbooks.
+## Module API Matrix (Target Modules)
+| Module ID | Kind | Uses | Manifest | Contract | Import Hint | SemVer |
+|-----------|------|------|----------|----------|-------------|--------|
+<!-- Filled by /tasks with ONLY target modules -->
 
 ---
 
-## Recommendations (preconditions & risks)
-[RECOMMENDATIONS]
-
-Common preconditions:
-- HTTP modules must export **OpenAPI 3.1** and pass **Redocly CLI** lint. :contentReference[oaicite:7]{index=7}
-- In-process ports must be typed and match the manifest.
-- If consumer/provider coupling exists, add **CDC** tests (e.g., Pact). :contentReference[oaicite:8]{index=8}
-- Definition of Done applies per module; do not proceed to next module until **READY**. :contentReference[oaicite:9]{index=9}
+## Preparation
+- [ ] T000 @prio(P1) Bootstrap missing modules via `/module-bootstrap FROM_TASKS=[###-feature]`
+- [ ] T001 @prio(P1) Validate docs-as-code:
+      ```bash
+      python .specify/scripts/registry_validate.py
+      python .specify/scripts/manifest_lint.py
+      ```
 
 ---
 
-## Fan-out
-Per-module playbooks created under: `tasks.by-module/`.
+## Global Tasks (TDD-first)
+<!-- repeated per Target Module -->
+- [ ] T0xx **Define contract** @module(<id>) @prio(P1)
+- [ ] T0xx **Write tests** @module(<id>) @prio(P1) [TDD]
+- [ ] T0xx **Implement** @module(<id>) @prio(P1)
+- [ ] T0xx **Update manifest** @module(<id>) @prio(P1)
+- [ ] T0xx **Verify module** @module(<id>) @prio(P1)
 
-Execution order (topological by dependencies):
-1. Core/providers
-2. Feature backends
-3. Feature frontends
+### Integration (Next.js router glue)
+- [ ] T0yy **Enable dark theme globally** @module(<router-owner>) @prio(P1)
+- [ ] T0yy **Wire "/" (DashboardRoute)** @module(<router-owner>) @prio(P1)
+- [ ] T0yy **Wire "/goals" (GoalsRoute)** @module(<router-owner>) @prio(P1)
 
-> Finish a module to **READY** before starting the next (DoD gate).
+---
+
+## Gates
+- TDD, no deep imports, manifests & semver synced, CI (lint/typecheck) passes.
+
+## Next
+Run: `/module-bootstrap FROM_TASKS=[###-feature]` → `/fanout-tasks [###-feature]`
