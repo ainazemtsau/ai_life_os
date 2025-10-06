@@ -10,3 +10,7 @@ uv run ruff format --check .
 uv run mypy src
 uv run pytest -q
 ```
+# Check code
+```bash
+make qa
+'''
