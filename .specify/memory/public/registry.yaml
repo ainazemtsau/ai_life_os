@@ -9,7 +9,9 @@ modules:
     allowed_dirs:
       - backend/src/ai_life_backend/core/**
       - backend/tests/core/**
-    uses: []
+      - backend/src/ai_life_backend/contracts/core_protocols.py
+      - docs/public/backend.core.api.md
+    uses: ["-"]
     notes: "Cross-cutting primitives (types, errors, small utilities). No domain logic."
 
   backend.goals:
@@ -21,7 +23,9 @@ modules:
     allowed_dirs:
       - backend/src/ai_life_backend/goals/**
       - backend/tests/goals/**
-    uses: []
+      - backend/src/ai_life_backend/contracts/goals_openapi.yaml
+      - docs/public/backend.goals.api.md
+    uses: ["backend.core"]
     notes: "Goals feature module. HTTP contract via OpenAPI; in-process read-only queries via public port."
 
   frontend.design:
@@ -33,7 +37,8 @@ modules:
     allowed_dirs:
       - frontend/src/features/design/**
       - frontend/src/contracts/design.d.ts
-    uses: []
+      - docs/public/frontend.design.api.md
+    uses: ["-"]
     notes: "Foundational design system with no dependencies."
 
   frontend.goals:
@@ -45,6 +50,7 @@ modules:
     allowed_dirs:
       - frontend/src/features/goals/**
       - frontend/src/contracts/goals.d.ts
+      - docs/public/frontend.goals.api.md
     uses:
       - frontend.design
       - backend.goals

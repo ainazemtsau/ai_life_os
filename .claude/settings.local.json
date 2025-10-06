@@ -20,7 +20,8 @@
       "Bash(test:*)",
       "Bash(uv sync:*)",
       "Bash(make:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
