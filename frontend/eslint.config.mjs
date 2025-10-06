@@ -1,4 +1,3 @@
-// Flat ESLint config — Next.js (TS), Tailwind v4 friendly, strict typed rules for src/**
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -12,7 +11,6 @@ import sonarjs from "eslint-plugin-sonarjs";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
-  // 0) Игнорим конфиги/артефакты
   {
     ignores: [
       "eslint.config.mjs",
@@ -49,17 +47,12 @@ export default [
       sonarjs,
     },
     rules: {
-      // Clean code / simplicity
       complexity: ["error", 8],
       "max-lines": ["warn", { max: 300, skipBlankLines: true, skipComments: true }],
       "max-params": ["warn", 4],
       "sonarjs/no-duplicate-string": "warn",
-
-      // TS стиль
       "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
       "@typescript-eslint/no-explicit-any": "warn",
-
-      // Импорты
       "unused-imports/no-unused-imports": "error",
       "import/order": [
         "error",
@@ -74,26 +67,20 @@ export default [
           alphabetize: { order: "asc", caseInsensitive: true },
         },
       ],
-
-      // React / Hooks
       "react/react-in-jsx-scope": "off",
       "react/jsx-key": "error",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-
-      // Unicorn — безопасные и не шумные
       "unicorn/no-abusive-eslint-disable": "error",
       "unicorn/prefer-query-selector": "error",
     },
   },
 
-  // 4) СТРОГИЙ слой с type-aware правилами — ТОЛЬКО для исходников
   {
     files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        // Включаем анализ типов без явного project — typescript-eslint v8
         projectService: true,
         tsconfigRootDir: process.cwd(),
         ecmaVersion: "latest",
@@ -102,7 +89,6 @@ export default [
       },
     },
     rules: {
-      // TS rules that require type info
       "@typescript-eslint/await-thenable": "error",
       "@typescript-eslint/no-floating-promises": ["error", { ignoreVoid: false }],
       "@typescript-eslint/no-misused-promises": [
@@ -122,7 +108,6 @@ export default [
     },
   },
 
-  // 5) Тесты — немного расслабим (если у тебя будут тесты на фронте)
   {
     files: ["**/*.test.{ts,tsx}", "**/__tests__/**/*.{ts,tsx}"],
     rules: {
@@ -134,6 +119,5 @@ export default [
     },
   },
 
-  // 6) Prettier — последним
   eslintConfigPrettier,
 ];

@@ -18,7 +18,9 @@
       "Bash(DATABASE_URL=\"postgresql+asyncpg://postgres:postgres@localhost:5432/ai_life_os\" uv run alembic upgrade head)",
       "Bash(pnpm run:*)",
       "Bash(test:*)",
-      "Bash(uv sync:*)"
+      "Bash(uv sync:*)",
+      "Bash(make:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

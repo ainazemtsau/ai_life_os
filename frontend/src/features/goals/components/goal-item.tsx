@@ -2,22 +2,17 @@
  * GoalItem - Single goal row with inline actions
  */
 
-import { Button } from '@/features/design';
-import { cn } from '@/features/design';
-import type { GoalItemProps } from '../types';
+import { Button } from "@/features/design";
+import { cn } from "@/features/design";
 
-export function GoalItem({
-  goal,
-  onToggle,
-  onEdit,
-  onDelete,
-  className,
-}: GoalItemProps) {
+import type { GoalItemProps } from "../types";
+
+export function GoalItem({ goal, onToggle, onEdit, onDelete, className }: GoalItemProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50',
-        className
+        "flex items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50",
+        className,
       )}
     >
       {/* Checkbox */}
@@ -26,16 +21,11 @@ export function GoalItem({
         checked={goal.isDone}
         onChange={(e) => onToggle(goal.id, e.target.checked)}
         className="h-4 w-4 rounded border-gray-300"
-        aria-label={`Mark "${goal.title}" as ${goal.isDone ? 'incomplete' : 'complete'}`}
+        aria-label={`Mark "${goal.title}" as ${goal.isDone ? "incomplete" : "complete"}`}
       />
 
       {/* Title */}
-      <span
-        className={cn(
-          'flex-1 text-sm',
-          goal.isDone && 'text-muted-foreground line-through'
-        )}
-      >
+      <span className={cn("flex-1 text-sm", goal.isDone && "text-muted-foreground line-through")}>
         {goal.title}
       </span>
 

@@ -1,50 +1,51 @@
 version: 1
 modules:
-  frontend.design:
-    kind: typescript
-    semver: 0.1.0
-    manifest: .specify/memory/public/frontend.design.api.md
-    contract: "-"                         # no separate .d.ts contract
-    import_hint: import * as design from '@/features/design'
-    allowed_dirs:
-      - frontend/src/features/design/**
-    uses: ["-"]
-    notes: 'Design System; import only from the root entrypoint'
-   
   backend.core:
     kind: python
     semver: 0.1.0
-    manifest: .specify/memory/public/backend.core.api.md
-    contract: "-"  # нет HTTP-контракта; поставщик in-process утилит
-    import_hint: from ai_life_backend.core.httpkit import make_public_router
+    manifest: docs/public/backend.core.api.md
+    contract: backend/src/ai_life_backend/contracts/core_protocols.py
+    import_hint: from ai_life_backend.core.public import *
     allowed_dirs:
       - backend/src/ai_life_backend/core/**
       - backend/tests/core/**
-    uses: ["-"]
-    notes: "Cross-cutting utilities: Problem (RFC7807), exception handlers, router wrapper. No domain logic."
-
+    uses: []
+    notes: "Cross-cutting primitives (types, errors, small utilities). No domain logic."
 
   backend.goals:
     kind: python
     semver: 0.1.0
-    manifest: .specify/memory/public/backend.goals.api.md
-    contract: backend/src/ai_life_backend/contracts/goals_openapi.yaml   # single HTTP contract (OpenAPI)
-    import_hint: from ai_life_backend.goals.public import *              # same-process public port
+    manifest: docs/public/backend.goals.api.md
+    contract: backend/src/ai_life_backend/contracts/goals_openapi.yaml
+    import_hint: from ai_life_backend.goals.public import *
     allowed_dirs:
       - backend/src/ai_life_backend/goals/**
       - backend/tests/goals/**
-    uses: ["-"]
-    notes: 'Same-process: use in-process port from ai_life_backend.goals.public; Cross-process: use HTTP via OpenAPI'
+    uses: []
+    notes: "Goals feature module. HTTP contract via OpenAPI; in-process read-only queries via public port."
+
+  frontend.design:
+    kind: typescript
+    semver: 0.1.0
+    manifest: docs/public/frontend.design.api.md
+    contract: frontend/src/contracts/design.d.ts
+    import_hint: import * as design from '@/features/design'
+    allowed_dirs:
+      - frontend/src/features/design/**
+      - frontend/src/contracts/design.d.ts
+    uses: []
+    notes: "Foundational design system with no dependencies."
 
   frontend.goals:
     kind: typescript
     semver: 0.1.0
-    manifest: .specify/memory/public/frontend.goals.api.md
-    contract: "-"                         # consumes backend.goals OpenAPI
+    manifest: docs/public/frontend.goals.api.md
+    contract: frontend/src/contracts/goals.d.ts
     import_hint: import * as goals from '@/features/goals'
     allowed_dirs:
       - frontend/src/features/goals/**
+      - frontend/src/contracts/goals.d.ts
     uses:
       - frontend.design
       - backend.goals
-    notes: 'Generate types/SDK from backend.goals OpenAPI'
+    notes: "Goals UI. Uses design system and backend.goals over HTTP."

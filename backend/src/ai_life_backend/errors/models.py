@@ -1,14 +1,18 @@
-# backend/src/ai_life_backend/errors/models.py
-from pydantic import BaseModel, AnyUrl
-from typing import Optional
+"""RFC 7807 Problem Details model definition."""
+
+from pydantic import AnyUrl, BaseModel
 
 
 class Problem(BaseModel):
-    type: Optional[AnyUrl] = None
+    """RFC 7807 Problem Details object for HTTP error responses."""
+
+    type: AnyUrl | None = None
     title: str
     status: int
-    detail: Optional[str] = None
-    instance: Optional[AnyUrl] = None
+    detail: str | None = None
+    instance: AnyUrl | None = None
 
     class Config:
+        """Pydantic model config."""
+
         extra = "allow"  # позволяем доп.поля по RFC 7807/9457

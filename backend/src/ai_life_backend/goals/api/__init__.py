@@ -1,17 +1,17 @@
 """API layer for goals module."""
 
 from .schemas import (
-    GoalCreateRequest,
-    GoalUpdateRequest,
-    GoalResponse,
-    GoalListResponse,
     ErrorResponse,
+    GoalCreateRequest,
+    GoalListResponse,
+    GoalResponse,
+    GoalUpdateRequest,
 )
 
 __all__ = [
-    "GoalCreateRequest",
-    "GoalUpdateRequest",
-    "GoalResponse",
-    "GoalListResponse",
     "ErrorResponse",
+    "GoalCreateRequest",
+    "GoalListResponse",
+    "GoalResponse",
+    "GoalUpdateRequest",
 ]

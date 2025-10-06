@@ -6,19 +6,17 @@
  * Provides foundational UI components and utilities for consistent UX.
  */
 
-import * as React from 'react';
-import { VariantProps } from 'class-variance-authority';
+import type * as React from "react";
 
 /**
  * Button component variants and sizes
  */
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Visual variant */
-  variant?: 'default' | 'destructive' | 'outline' | 'ghost' | 'link';
+  variant?: "default" | "destructive" | "outline" | "ghost" | "link";
 
   /** Size variant */
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  size?: "default" | "sm" | "lg" | "icon";
 
   /** Render as child component */
   asChild?: boolean;
@@ -118,7 +116,7 @@ export const CardContent: React.FC<CardContentProps>;
  */
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Visual variant */
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  variant?: "default" | "secondary" | "destructive" | "outline";
   children: React.ReactNode;
 }
 

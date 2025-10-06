@@ -1,39 +1,48 @@
-# /fanout-tasks <feature-id>
-
 **Goal**
-Split the GLOBAL feature task file into per-module scaffolds (no deep expansion). Refresh only the protected _FANOUT_ block in each module file.
+Synchronize GLOBAL tasks (`tasks.md`) into each module’s playbook as a read-only fan-out list,
+updating **only** the protected `FANOUT` block. Preserve all manual edits elsewhere.
 
 **Args**
-- `<feature-id>`: directory under `.specify/specs/` (e.g., `001-ui-llm-get`)
+- `<feature-id>`: directory under `specs/` (e.g., `001-goals-management-mvp`)
 
 **Reads**
-- `.specify/specs/<feature-id>/tasks.md` (global)
-- `.specify/templates/module-tasks-template.md` (optional scaffold)
+- `specs/<feature-id>/tasks.md` (GLOBAL tasks; high-level, tagged with @module(...))
+- `.specify/memory/public/registry.yaml` (authoritative module set, deps, allowed_dirs)
+- `.specify/templates/module-playbook-template.md` (seed template, if a module file is missing)
 
 **Writes**
-- `.specify/specs/<feature-id>/tasks.by-module/<module>-tasks.md`
-  - Create if missing (seed from template if present)
+- `specs/<feature-id>/tasks.by-module/<module-id>.md`
+  - Create if missing (seed from **module-playbook-template.md**)
   - Update ONLY the block between:
-    `<!-- FANOUT:BEGIN --> ... <!-- FANOUT:END -->`
+    `<!-- FANOUT:BEGIN -->` … `<!-- FANOUT:END -->`
+  - If the block is missing, append it at the end of file.
 
 **Module detection**
-1) Prefer explicit `@module(<name>)` tag in the task line.
-2) If missing, infer by path hints:
-   - `backend/` → `backend`
-   - `frontend/` → `frontend`
-   - `api/` → `api`
-   - `repo/` → `repo`
-   - `ios/` → `ios`
-   - `android/` → `android`
-   (Extend in the helper script if needed.)
+1) Primary: explicit tag `@module(<id>)` in each GLOBAL task line.
+2) Validation: `<id>` MUST exist in `registry.yaml`. If unknown → mark as **unknown** in summary.
+3) (Optional fallback) If a task has no tag, leave it **unassigned** (listed in summary). Heуристики по путям отключены по умолчанию — требуем явные теги для предсказуемости.
+
+**Order of fan-out**
+- Compute a **topological order** from `uses:` in `registry.yaml` (core/providers → dependents).
+- Emit summary in that order (Kahn’s algorithm). :contentReference[oaicite:1]{index=1}
+
+**What goes into the FANOUT block**
+- Header with module id and date.
+- Flat checklist of GLOBAL tasks tagged этим модулем (без путей, без переписывания текста).
+- Сохраняем ID задач (например, `T030`) и все теги (`@prio(P1)`, `@owner(...)`, `[P]`).
+
+**What does NOT change**
+- Любые разделы вне `FANOUT` блока (твои детальные шаги TDD, DoD, заметки).
+- Содержимое `module-playbook-template.md` за пределами блока.
 
 **Procedure**
-```bash
 python .specify/scripts/fanout_tasks.py "<feature-id>"
-```
+Output (summary)
 
-Notes
+Modules (topo order) with counts: backend.core (3), backend.goals (5), …
 
-Do NOT load module constitutions here; this is a pure fan-out step.
-Print a summary of modules and item counts when done.
-If some items have no detectable module, list them as "unassigned" in the summary.
+Unknown @module tags (not in registry)
+
+Unassigned tasks (no @module)
+
+Modules with zero items (OK; just report)

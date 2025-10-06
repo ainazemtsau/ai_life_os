@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-import sys, json, re, pathlib
+import sys
+import json
+import re
+import pathlib
 
 try:
     import yaml  # type: ignore

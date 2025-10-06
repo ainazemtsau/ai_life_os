@@ -1,8 +1,9 @@
 """Pydantic schemas for Goals API."""
 
-from pydantic import BaseModel, Field, field_validator
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class GoalCreateRequest(BaseModel):
@@ -13,8 +14,10 @@ class GoalCreateRequest(BaseModel):
     @field_validator("title")
     @classmethod
     def title_not_empty(cls, v: str) -> str:
+        """Validate that title is not empty or whitespace-only."""
         if not v.strip():
-            raise ValueError("Title cannot be empty or whitespace-only")
+            msg = "Title cannot be empty or whitespace-only"
+            raise ValueError(msg)
         return v
 
 
@@ -27,22 +30,23 @@ class GoalUpdateRequest(BaseModel):
     @field_validator("title")
     @classmethod
     def title_not_empty(cls, v: str | None) -> str | None:
+        """Validate that title is not empty or whitespace-only if provided."""
         if v is not None and not v.strip():
-            raise ValueError("Title cannot be empty or whitespace-only")
+            msg = "Title cannot be empty or whitespace-only"
+            raise ValueError(msg)
         return v
 
 
 class GoalResponse(BaseModel):
     """Response schema for a goal."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     title: str
     is_done: bool
     date_created: datetime
     date_updated: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class GoalListResponse(BaseModel):

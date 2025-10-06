@@ -1,5 +1,5 @@
-"""
-Goals Module - Public Contract (Protocol Definitions)
+"""Goals Module - Public Contract (Protocol Definitions).
+
 Version: 0.1.0
 
 This contract defines the repository interface that must be implemented
@@ -8,19 +8,18 @@ by any concrete repository for the goals module.
 
 from typing import Protocol
 from uuid import UUID
+
 from ai_life_backend.goals.domain import Goal
 
 
 class GoalRepository(Protocol):
-    """
-    Repository interface for Goal persistence.
+    """Repository interface for Goal persistence.
 
     All implementations must provide these async methods.
     """
 
     async def create(self, title: str) -> Goal:
-        """
-        Create a new goal.
+        """Create a new goal.
 
         Args:
             title: Goal title (1-255 characters, non-empty after trim)
@@ -34,8 +33,7 @@ class GoalRepository(Protocol):
         ...
 
     async def get_by_id(self, goal_id: UUID) -> Goal | None:
-        """
-        Retrieve a single goal by ID.
+        """Retrieve a single goal by ID.
 
         Args:
             goal_id: UUID of the goal
@@ -46,8 +44,7 @@ class GoalRepository(Protocol):
         ...
 
     async def list_all(self) -> list[Goal]:
-        """
-        List all goals.
+        """List all goals.
 
         Returns:
             List of all goals, sorted by is_done ASC, date_updated DESC
@@ -56,8 +53,7 @@ class GoalRepository(Protocol):
         ...
 
     async def list_by_status(self, is_done: bool) -> list[Goal]:
-        """
-        List goals filtered by completion status.
+        """List goals filtered by completion status.
 
         Args:
             is_done: True for completed goals, False for active goals
@@ -70,8 +66,7 @@ class GoalRepository(Protocol):
     async def update(
         self, goal_id: UUID, title: str | None = None, is_done: bool | None = None
     ) -> Goal | None:
-        """
-        Update a goal's title and/or completion status.
+        """Update a goal's title and/or completion status.
 
         Args:
             goal_id: UUID of the goal to update
@@ -88,8 +83,7 @@ class GoalRepository(Protocol):
         ...
 
     async def delete(self, goal_id: UUID) -> bool:
-        """
-        Delete a goal permanently.
+        """Delete a goal permanently.
 
         Args:
             goal_id: UUID of the goal to delete

@@ -2,10 +2,18 @@
  * Hook for goal mutations with optimistic updates
  */
 
-import { useState } from 'react';
-import { useSWRConfig } from 'swr';
-import { goalsApi } from '../lib/api-client';
-import type { Goal, GoalCreateInput, GoalUpdateInput, UseGoalMutationsResult } from '../types';
+import { useState } from "react";
+
+import { useSWRConfig } from "swr";
+
+import { goalsApi } from "../lib/api-client";
+import type { Goal, GoalCreateInput, GoalUpdateInput, UseGoalMutationsResult } from "../types";
+
+const GOALS_API_PREFIX = "/api/goals";
+
+const isGoalsKey = (key: unknown): boolean => {
+  return typeof key === "string" && key.startsWith(GOALS_API_PREFIX);
+};
 
 export function useGoalMutations(): UseGoalMutationsResult {
   const { mutate } = useSWRConfig();
@@ -15,10 +23,7 @@ export function useGoalMutations(): UseGoalMutationsResult {
     setIsMutating(true);
     try {
       const newGoal = await goalsApi.createGoal(input);
-
-      // Invalidate all goals lists
-      await mutate((key: unknown) => typeof key === 'string' && key.startsWith('/api/goals'));
-
+      await mutate(isGoalsKey);
       return newGoal;
     } finally {
       setIsMutating(false);
@@ -29,11 +34,8 @@ export function useGoalMutations(): UseGoalMutationsResult {
     setIsMutating(true);
     try {
       const updatedGoal = await goalsApi.updateGoal(id, input);
-
-      // Invalidate specific goal and lists
-      await mutate(`/api/goals/${id}`);
-      await mutate((key: unknown) => typeof key === 'string' && key.startsWith('/api/goals'));
-
+      await mutate(`${GOALS_API_PREFIX}/${id}`);
+      await mutate(isGoalsKey);
       return updatedGoal;
     } finally {
       setIsMutating(false);
@@ -44,10 +46,8 @@ export function useGoalMutations(): UseGoalMutationsResult {
     setIsMutating(true);
     try {
       await goalsApi.deleteGoal(id);
-
-      // Invalidate specific goal and lists
-      await mutate(`/api/goals/${id}`, undefined, { revalidate: false });
-      await mutate((key: unknown) => typeof key === 'string' && key.startsWith('/api/goals'));
+      await mutate(`${GOALS_API_PREFIX}/${id}`, undefined, { revalidate: false });
+      await mutate(isGoalsKey);
     } finally {
       setIsMutating(false);
     }

@@ -1,7 +1,12 @@
-# backend/src/ai_life_backend/app.py
+"""AI Life OS FastAPI application with goals management API."""
+
+from typing import Any
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
+
+from ai_life_backend.goals.public import goals_router
 
 app = FastAPI(
     title="AI Life OS API",
@@ -18,8 +23,9 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-from ai_life_backend.goals.public import goals_router
+
 app.include_router(goals_router, prefix="/api", tags=["goals"])
+
 
 @app.get(
     "/health",
@@ -28,25 +34,24 @@ app.include_router(goals_router, prefix="/api", tags=["goals"])
         400: {
             "description": "Bad Request",
             "content": {
-                "application/problem+json": {
-                    "schema": {"$ref": "#/components/schemas/Problem"}
-                }
+                "application/problem+json": {"schema": {"$ref": "#/components/schemas/Problem"}}
             },
         },
         500: {
             "description": "Server Error",
             "content": {
-                "application/problem+json": {
-                    "schema": {"$ref": "#/components/schemas/Problem"}
-                }
+                "application/problem+json": {"schema": {"$ref": "#/components/schemas/Problem"}}
             },
         },
     },
 )
 async def health_check() -> dict[str, str]:
+    """Health check endpoint."""
     return {"status": "ok"}
 
-def custom_openapi():
+
+def custom_openapi() -> dict[str, Any]:
+    """Generate custom OpenAPI schema with RFC7807 Problem schema."""
     if app.openapi_schema:
         return app.openapi_schema
 
@@ -95,7 +100,6 @@ def custom_openapi():
     app.openapi_schema = schema
     return app.openapi_schema
 
-app.openapi = custom_openapi
 
-if __name__ == "__main__":
-    main()
+# Override the openapi method to use our custom schema
+app.openapi = custom_openapi  # type: ignore[method-assign]

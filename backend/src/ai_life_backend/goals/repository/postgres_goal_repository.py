@@ -1,20 +1,24 @@
 """PostgreSQL implementation of GoalRepository."""
 
-from typing import cast
+from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
-from datetime import datetime, timezone
-from sqlalchemy import Table, Column, String, Boolean, DateTime, MetaData, select, update, delete
+
+from sqlalchemy import Boolean, Column, DateTime, MetaData, String, Table, delete, select, update
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.ext.asyncio import AsyncEngine
+
 from ai_life_backend.goals.domain import Goal
 
 metadata = MetaData()
+
+MAX_TITLE_LENGTH = 255
 
 goals_table = Table(
     "goals",
     metadata,
     Column("id", PG_UUID(as_uuid=True), primary_key=True),
-    Column("title", String(255), nullable=False),
+    Column("title", String(MAX_TITLE_LENGTH), nullable=False),
     Column("is_done", Boolean, nullable=False),
     Column("date_created", DateTime(timezone=True), nullable=False),
     Column("date_updated", DateTime(timezone=True), nullable=False),
@@ -25,14 +29,14 @@ class PostgresGoalRepository:
     """PostgreSQL implementation of GoalRepository Protocol."""
 
     def __init__(self, engine: AsyncEngine) -> None:
+        """Initialize repository with database engine."""
         self._engine = engine
 
     async def create(self, title: str) -> Goal:
         """Create new goal."""
-        if not title or not title.strip():
-            raise ValueError("Title cannot be empty")
-        if len(title) > 255:
-            raise ValueError("Title cannot exceed 255 characters")
+        if len(title) > MAX_TITLE_LENGTH:
+            msg = f"Title cannot exceed {MAX_TITLE_LENGTH} characters"
+            raise ValueError(msg)
 
         async with self._engine.begin() as conn:
             result = await conn.execute(
@@ -108,15 +112,19 @@ class PostgresGoalRepository:
     ) -> Goal | None:
         """Update goal fields and refresh date_updated."""
         if title is None and is_done is None:
-            raise ValueError("At least one field must be provided")
+            msg = "At least one field must be provided"
+            raise ValueError(msg)
 
         if title is not None:
             if not title.strip():
-                raise ValueError("Title cannot be empty or whitespace-only")
-            if len(title) > 255:
-                raise ValueError("Title cannot exceed 255 characters")
+                msg = "Title cannot be empty or whitespace-only"
+                raise ValueError(msg)
+            if len(title) > MAX_TITLE_LENGTH:
+                msg = "Title cannot exceed 255 characters"
+                raise ValueError(msg)
 
-        update_values: dict = {"date_updated": datetime.now(timezone.UTC)}
+        update_values: dict[str, Any] = {"date_updated": datetime.now(UTC)}
+
         if title is not None:
             update_values["title"] = title
         if is_done is not None:

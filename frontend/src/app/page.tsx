@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { GoalList } from '@/features/goals';
+import { GoalList } from "@/features/goals";
 
 export default function Page() {
   return (

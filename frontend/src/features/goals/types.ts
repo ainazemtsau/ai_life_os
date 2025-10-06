@@ -34,7 +34,7 @@ export interface ApiError {
 // ============================================================================
 
 export interface GoalListProps {
-  filter?: 'all' | 'active' | 'done';
+  filter?: "all" | "active" | "done";
   onGoalClick?: (goal: Goal) => void;
   className?: string;
 }

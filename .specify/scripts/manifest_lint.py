@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-import sys, pathlib, json, re
+import sys
+import pathlib
+import json
 
 SECTIONS = ("Overview","Exports","Types","Usage","Stability","Version")
 

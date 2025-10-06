@@ -2,16 +2,19 @@
 """Export OpenAPI schema from the FastAPI application (code is the single source of truth)."""
 
 from __future__ import annotations
+
 import json
-import sys
 from pathlib import Path
+import sys
+from types import ModuleType
 
 # Ensure backend/src is importable
-ROOT = Path(__file__).resolve().parents[1]        # .../backend
+ROOT = Path(__file__).resolve().parents[1]  # .../backend
 SRC = ROOT / "src"
 sys.path.insert(0, str(SRC))
 
 # Optional YAML support
+yaml: ModuleType | None
 try:
     import yaml  # pip install pyyaml
 except Exception:
@@ -28,13 +31,18 @@ except ModuleNotFoundError as e:
     print('  pip install "fastapi" pyyaml')
     sys.exit(1)
 
+
 def export_openapi(out_path: Path) -> None:
+    """Export OpenAPI schema to a JSON or YAML file."""
     schema = app.openapi()  # FastAPI official way to get OpenAPI schema
     out_path.parent.mkdir(parents=True, exist_ok=True)
     if out_path.suffix.lower() in {".yml", ".yaml"} and yaml is not None:
-        out_path.write_text(yaml.safe_dump(schema, sort_keys=False, allow_unicode=True), encoding="utf-8")
+        out_path.write_text(
+            yaml.safe_dump(schema, sort_keys=False, allow_unicode=True), encoding="utf-8"
+        )
     else:
         out_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
 
 if __name__ == "__main__":
     out = ROOT / "src" / "ai_life_backend" / "contracts" / "goals_openapi.yaml"

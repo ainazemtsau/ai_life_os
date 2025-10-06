@@ -49,7 +49,7 @@ export interface GoalUpdateInput {
 /**
  * Filter options for listing goals
  */
-export type GoalFilterStatus = 'all' | 'active' | 'done';
+export type GoalFilterStatus = "all" | "active" | "done";
 
 /**
  * API error response
