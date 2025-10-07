@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
 from ai_life_backend.goals.public import goals_router
+from ai_life_backend.milestones.public import milestones_router
 
 app = FastAPI(
     title="AI Life OS API",
@@ -25,6 +26,7 @@ app.add_middleware(
 
 
 app.include_router(goals_router, prefix="/api", tags=["goals"])
+app.include_router(milestones_router, prefix="/api", tags=["milestones"])
 
 
 @app.get(
@@ -94,6 +96,7 @@ def custom_openapi() -> dict[str, Any]:
     # (опционально) описания тегов
     schema["tags"] = [
         {"name": "goals", "description": "Goals management endpoints"},
+        {"name": "milestones", "description": "Milestones management endpoints"},
         {"name": "health", "description": "Health checks"},
     ]
 

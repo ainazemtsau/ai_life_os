@@ -71,14 +71,14 @@ modules:
 
   backend.milestones:
     kind: python
-    semver: 0.1.0
+    semver: 0.2.0
     manifest: docs/public/backend.milestones.api.md
     contract: backend/src/ai_life_backend/contracts/milestones_openapi.yaml
     import_hint: from ai_life_backend.milestones.public import *
     uses:
       - backend.core
       - backend.goals
-    notes: "Milestones domain module. HTTP contract via OpenAPI; in-process read-only queries via Protocols."
+    notes: "Milestones domain module. HTTP contract via OpenAPI; in-process read-only queries via public port."
 
   frontend.projects:
     kind: typescript
