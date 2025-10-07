@@ -8,6 +8,29 @@ MAX_TITLE_LENGTH = 255
 
 
 @dataclass(frozen=True)
+class CreateMilestoneInput:
+    """Input for creating a milestone."""
+
+    goal_id: UUID
+    title: str
+    status: str
+    demo_criterion: str
+    blocking: bool
+    due: datetime | None = None
+
+
+@dataclass(frozen=True)
+class UpdateMilestoneInput:
+    """Input for updating a milestone."""
+
+    title: str | None = None
+    due: datetime | None = None
+    status: str | None = None
+    demo_criterion: str | None = None
+    blocking: bool | None = None
+
+
+@dataclass(frozen=True)
 class Milestone:
     """Immutable domain entity representing a milestone.
 

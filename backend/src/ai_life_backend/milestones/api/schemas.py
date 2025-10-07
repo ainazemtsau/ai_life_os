@@ -6,7 +6,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-
 # Status type matching the unified status set from the spec
 MilestoneStatus = Literal["todo", "doing", "done", "blocked"]
 

@@ -19,7 +19,11 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from ai_life_backend.milestones.domain.milestone import Milestone
+from ai_life_backend.milestones.domain.milestone import (
+    CreateMilestoneInput,
+    Milestone,
+    UpdateMilestoneInput,
+)
 
 metadata = MetaData()
 
@@ -47,21 +51,13 @@ class PostgresMilestoneRepository:
         """Initialize repository with database engine."""
         self._engine = engine
 
-    async def create(
-        self,
-        goal_id: UUID,
-        title: str,
-        status: str,
-        demo_criterion: str,
-        blocking: bool,
-        due: datetime | None = None,
-    ) -> Milestone:
+    async def create(self, input_data: CreateMilestoneInput) -> Milestone:
         """Create new milestone."""
-        if len(title) > MAX_TITLE_LENGTH:
+        if len(input_data.title) > MAX_TITLE_LENGTH:
             msg = f"Title cannot exceed {MAX_TITLE_LENGTH} characters"
             raise ValueError(msg)
 
-        if len(demo_criterion) > MAX_TITLE_LENGTH:
+        if len(input_data.demo_criterion) > MAX_TITLE_LENGTH:
             msg = f"Demo criterion cannot exceed {MAX_TITLE_LENGTH} characters"
             raise ValueError(msg)
 
@@ -69,12 +65,12 @@ class PostgresMilestoneRepository:
             result = await conn.execute(
                 milestones_table.insert()
                 .values(
-                    goal_id=goal_id,
-                    title=title,
-                    due=due,
-                    status=status,
-                    demo_criterion=demo_criterion,
-                    blocking=blocking,
+                    goal_id=input_data.goal_id,
+                    title=input_data.title,
+                    due=input_data.due,
+                    status=input_data.status,
+                    demo_criterion=input_data.demo_criterion,
+                    blocking=input_data.blocking,
                 )
                 .returning(milestones_table)
             )
@@ -139,7 +135,10 @@ class PostgresMilestoneRepository:
             result = await conn.execute(
                 select(milestones_table)
                 .where(milestones_table.c.goal_id == goal_id)
-                .order_by(milestones_table.c.due.nullsfirst(), milestones_table.c.date_created.desc())
+                .order_by(
+                    milestones_table.c.due.nullsfirst(),
+                    milestones_table.c.date_created.desc(),
+                )
             )
             return [
                 Milestone(
@@ -156,53 +155,62 @@ class PostgresMilestoneRepository:
                 for row in result.all()
             ]
 
-    async def update(
-        self,
-        milestone_id: UUID,
-        title: str | None = None,
-        due: datetime | None | object = None,  # object is sentinel for "not provided"
-        status: str | None = None,
-        demo_criterion: str | None = None,
-        blocking: bool | None = None,
-    ) -> Milestone | None:
-        """Update milestone fields and refresh date_updated."""
-        _UNSET = object()  # Sentinel value to distinguish None from "not provided"
-
-        if all(
-            v is None or (v is _UNSET)
-            for v in [title, due if due is not _UNSET else _UNSET, status, demo_criterion, blocking]
-        ):
+    @staticmethod
+    def _validate_update_input(input_data: UpdateMilestoneInput) -> None:
+        """Validate update input data."""
+        has_updates = any(
+            [
+                input_data.title is not None,
+                input_data.due is not None,
+                input_data.status is not None,
+                input_data.demo_criterion is not None,
+                input_data.blocking is not None,
+            ]
+        )
+        if not has_updates:
             msg = "At least one field must be provided"
             raise ValueError(msg)
 
-        if title is not None:
-            if not title.strip():
-                msg = "Title cannot be empty or whitespace-only"
-                raise ValueError(msg)
-            if len(title) > MAX_TITLE_LENGTH:
-                msg = f"Title cannot exceed {MAX_TITLE_LENGTH} characters"
-                raise ValueError(msg)
+        if input_data.title is not None and not input_data.title.strip():
+            msg = "Title cannot be empty or whitespace-only"
+            raise ValueError(msg)
 
-        if demo_criterion is not None:
-            if not demo_criterion.strip():
-                msg = "Demo criterion cannot be empty or whitespace-only"
-                raise ValueError(msg)
-            if len(demo_criterion) > MAX_TITLE_LENGTH:
-                msg = f"Demo criterion cannot exceed {MAX_TITLE_LENGTH} characters"
-                raise ValueError(msg)
+        if input_data.demo_criterion is not None and not input_data.demo_criterion.strip():
+            msg = "Demo criterion cannot be empty or whitespace-only"
+            raise ValueError(msg)
 
+        if input_data.title and len(input_data.title) > MAX_TITLE_LENGTH:
+            msg = f"Title cannot exceed {MAX_TITLE_LENGTH} characters"
+            raise ValueError(msg)
+
+        if input_data.demo_criterion and len(input_data.demo_criterion) > MAX_TITLE_LENGTH:
+            msg = f"Demo criterion cannot exceed {MAX_TITLE_LENGTH} characters"
+            raise ValueError(msg)
+
+    @staticmethod
+    def _build_update_dict(input_data: UpdateMilestoneInput) -> dict[str, Any]:
+        """Build dictionary of values to update."""
         update_values: dict[str, Any] = {"date_updated": datetime.now(UTC)}
 
-        if title is not None:
-            update_values["title"] = title
-        if due is not _UNSET:
-            update_values["due"] = due
-        if status is not None:
-            update_values["status"] = status
-        if demo_criterion is not None:
-            update_values["demo_criterion"] = demo_criterion
-        if blocking is not None:
-            update_values["blocking"] = blocking
+        if input_data.title is not None:
+            update_values["title"] = input_data.title
+        if input_data.due is not None:
+            update_values["due"] = input_data.due
+        if input_data.status is not None:
+            update_values["status"] = input_data.status
+        if input_data.demo_criterion is not None:
+            update_values["demo_criterion"] = input_data.demo_criterion
+        if input_data.blocking is not None:
+            update_values["blocking"] = input_data.blocking
+
+        return update_values
+
+    async def update(
+        self, milestone_id: UUID, input_data: UpdateMilestoneInput
+    ) -> Milestone | None:
+        """Update milestone fields and refresh date_updated."""
+        self._validate_update_input(input_data)
+        update_values = self._build_update_dict(input_data)
 
         async with self._engine.begin() as conn:
             result = await conn.execute(

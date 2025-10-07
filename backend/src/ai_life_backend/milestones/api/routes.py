@@ -12,6 +12,10 @@ from ai_life_backend.milestones.api.schemas import (
     MilestoneResponse,
     MilestoneUpdateRequest,
 )
+from ai_life_backend.milestones.domain.milestone import (
+    CreateMilestoneInput,
+    UpdateMilestoneInput,
+)
 from ai_life_backend.milestones.repository.postgres_milestone_repository import (
     PostgresMilestoneRepository,
 )
@@ -42,7 +46,7 @@ async def create_milestone(request: MilestoneCreateRequest, repo: RepoDep) -> Mi
         HTTPException: If validation fails (422)
     """
     try:
-        milestone = await repo.create(
+        input_data = CreateMilestoneInput(
             goal_id=request.goal_id,
             title=request.title,
             status=request.status,
@@ -50,6 +54,7 @@ async def create_milestone(request: MilestoneCreateRequest, repo: RepoDep) -> Mi
             blocking=request.blocking,
             due=request.due,
         )
+        milestone = await repo.create(input_data)
         return MilestoneResponse.model_validate(milestone)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
@@ -109,27 +114,15 @@ async def update_milestone(
         HTTPException: If no fields provided (422), if milestone not found (404),
                       or if validation fails (422)
     """
-    # Check that at least one field is provided
-    if all(
-        v is None
-        for v in [
-            request.title,
-            request.status,
-            request.demo_criterion,
-            request.blocking,
-        ]
-    ) and not hasattr(request, "due"):
-        raise HTTPException(status_code=422, detail="At least one field must be provided")
-
     try:
-        milestone = await repo.update(
-            milestone_id,
+        input_data = UpdateMilestoneInput(
             title=request.title,
             due=request.due,
             status=request.status,
             demo_criterion=request.demo_criterion,
             blocking=request.blocking,
         )
+        milestone = await repo.update(milestone_id, input_data)
         if not milestone:
             raise HTTPException(status_code=404, detail="Milestone not found")
         return MilestoneResponse.model_validate(milestone)

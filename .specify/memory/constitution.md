@@ -100,7 +100,7 @@ A module is **READY** when:
   - S: single responsibility (modules/classes/functions).
   - O: extend via interfaces/composition; avoid modifying stable code.
   - L: substitutable abstractions; no surprising side effects.
-  - I: small interfaces; avoid “god” interfaces.
+  - I: small interfaces; avoid "god" interfaces.
   - D: depend on abstractions; repositories/services behind contracts.
 - **KISS/YAGNI**, **DRY**.
 - Functions ≤ 40 lines; files ≈ ≤ 300 lines; cyclomatic complexity ≤ 8.
@@ -108,6 +108,34 @@ A module is **READY** when:
 - No global mutable state; side effects at the edges (api/infra).
 - Fail fast; explicit exceptions; no silent catches.
 - Docstrings for public APIs; comments explain **why**, not **what**.
+
+### 9.1) Strict Quality Gates (ZERO TOLERANCE)
+**MANDATORY PRINCIPLE:** All quality checks MUST pass. NO exceptions. NO workarounds.
+
+**Prohibited Actions:**
+- ❌ **NEVER** disable linting rules (no `# noqa`, `# type: ignore`, `# ruff: noqa`, `# pylint: disable`, `// @ts-ignore`, `// eslint-disable`)
+- ❌ **NEVER** commit code with failing tests
+- ❌ **NEVER** commit code with lint errors or warnings
+- ❌ **NEVER** commit code with type errors
+- ❌ **NEVER** skip quality checks in CI/CD
+- ❌ **NEVER** use `--no-verify` on git hooks
+- ❌ **NEVER** force push without approval
+
+**Required Actions:**
+- ✅ **ALWAYS** refactor code to fix lint issues (reduce complexity, split functions, use DTOs)
+- ✅ **ALWAYS** ensure all tests pass before commit
+- ✅ **ALWAYS** run full quality suite locally: `make qa` or equivalent
+- ✅ **ALWAYS** address root cause, not symptoms
+- ✅ **ALWAYS** prefer structural improvements over suppressions
+
+**Enforcement:**
+- Module verification (`/module-verify`) MUST fail if ANY lint/test/type error exists
+- Pull requests with quality violations MUST be rejected
+- If a lint rule is genuinely wrong for the entire project, update `.ruff.toml` or `eslint.config.js` at project level, document in ADR
+- Individual suppressions are **FORBIDDEN**
+
+**Rationale:**
+Quality debt compounds exponentially. One ignored warning leads to dozens. Clean code is maintainable code. Zero tolerance prevents quality erosion.
 
 ---
 
@@ -139,6 +167,8 @@ A module is **READY** when:
 ---
 
 ## 13) Status
-**Version:** 1.5.0  
-**Ratified:** 2025-10-06  
-**Last Amended:** 2025-10-06
+**Version:** 1.6.0
+**Ratified:** 2025-10-06
+**Last Amended:** 2025-10-07
+**Changelog:**
+- 1.6.0 (2025-10-07): Added Section 9.1 "Strict Quality Gates (ZERO TOLERANCE)" - absolutely no lint/test/type error suppressions allowed
