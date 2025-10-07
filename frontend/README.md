@@ -13,7 +13,10 @@ pnpm dev
 # or
 bun dev
 ```
+
 # Check code
+
 ```bash
 make qa
 '''
+```

@@ -2,23 +2,29 @@
 
 set -e
 
-# Parse command line arguments
+# Flags
 JSON_MODE=false
-ARGS=()
+FORCE_SEED=false
 
+# Parse command line arguments
 for arg in "$@"; do
     case "$arg" in
-        --json) 
-            JSON_MODE=true 
+        --json)
+            JSON_MODE=true
             ;;
-        --help|-h) 
-            echo "Usage: $0 [--json]"
-            echo "  --json    Output results in JSON format"
-            echo "  --help    Show this help message"
-            exit 0 
+        --force-seed)
+            # Explicitly overwrite IMPL_PLAN from template (use with care)
+            FORCE_SEED=true
             ;;
-        *) 
-            ARGS+=("$arg") 
+        --help|-h)
+            echo "Usage: $0 [--json] [--force-seed]"
+            echo "  --json         Output results in JSON format"
+            echo "  --force-seed   Overwrite plan.md from template (dangerous; normally not needed)"
+            echo "  --help         Show this help message"
+            exit 0
+            ;;
+        *)
+            # ignore unknown args to be forward-compatible
             ;;
     esac
 done
@@ -36,15 +42,25 @@ check_feature_branch "$CURRENT_BRANCH" "$HAS_GIT" || exit 1
 # Ensure the feature directory exists
 mkdir -p "$FEATURE_DIR"
 
-# Copy plan template if it exists
+# Seed plan from template ONLY if it does not exist, unless --force-seed
 TEMPLATE="$REPO_ROOT/.specify/templates/plan-template.md"
 if [[ -f "$TEMPLATE" ]]; then
-    cp "$TEMPLATE" "$IMPL_PLAN"
-    echo "Copied plan template to $IMPL_PLAN"
+    if [[ "$FORCE_SEED" == "true" ]]; then
+        cp "$TEMPLATE" "$IMPL_PLAN"
+        echo "Seeded plan from template (forced) → $IMPL_PLAN"
+    elif [[ ! -f "$IMPL_PLAN" || ! -s "$IMPL_PLAN" ]]; then
+        cp "$TEMPLATE" "$IMPL_PLAN"
+        echo "Seeded new plan from template → $IMPL_PLAN"
+    else
+        # Non-destructive: do not overwrite existing plan
+        # echo kept quiet on purpose to avoid noisy logs
+        :
+    fi
 else
-    echo "Warning: Plan template not found at $TEMPLATE"
-    # Create a basic plan file if template doesn't exist
-    touch "$IMPL_PLAN"
+    # If template missing and plan absent, create an empty file so downstream steps have a path
+    if [[ ! -f "$IMPL_PLAN" ]]; then
+        touch "$IMPL_PLAN"
+    fi
 fi
 
 # Output results
@@ -53,7 +69,7 @@ if $JSON_MODE; then
         "$FEATURE_SPEC" "$IMPL_PLAN" "$FEATURE_DIR" "$CURRENT_BRANCH" "$HAS_GIT"
 else
     echo "FEATURE_SPEC: $FEATURE_SPEC"
-    echo "IMPL_PLAN: $IMPL_PLAN" 
+    echo "IMPL_PLAN: $IMPL_PLAN"
     echo "SPECS_DIR: $FEATURE_DIR"
     echo "BRANCH: $CURRENT_BRANCH"
     echo "HAS_GIT: $HAS_GIT"

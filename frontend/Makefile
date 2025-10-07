@@ -15,6 +15,7 @@ qa:
 	pnpm run lint:fix
 	pnpm run lint
 	pnpm run typecheck
+	pnpm run test
 
 ci:
 	pnpm run format:check

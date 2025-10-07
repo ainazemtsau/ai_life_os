@@ -2,32 +2,22 @@
 Version: 0.1.0
 
 ## Overview
-Cross-cutting utilities for backend modules. **No domain logic.**  
-Focus: consistent error representation (RFC 7807 Problem Details) and tiny helpers reused across features.
+Cross-cutting helpers for HTTP surfaces. Stable import point for other backend modules.
 
-## Exports (in-process only)
-### errors (RFC 7807 helpers)
-- `ProblemDetails` — lightweight dataclass (type, title, status, detail?, instance?)
-- `problem(*, title: str, status: int, detail: str | None = None, type: str | None = None, instance: str | None = None) -> dict`
-  - Build a Problem Details dict (serializable).
-- `http_error(*, title: str, status: int = 400, detail: str | None = None, type: str | None = None) -> Exception`
-  - Raise/return an exception suitable for FastAPI handlers with `application/problem+json` payload.
+## Exports
+- `make_public_router(internal_router: APIRouter) -> APIRouter` — wraps a feature router and attaches unified RFC7807 error responses
+- `PROBLEM_RESPONSES: dict[int, object]` — shared FastAPI `responses` mapping for 400/404/422/500
 
-> These helpers standardize error shape across modules (providers) and simplify consumer handling.
+## Usage
+```py
+from ai_life_backend.core.public import make_public_router
+from .api.routes import router as _internal
 
-### utils (minimal, optional)
-- `utcnow() -> datetime` — timezone-aware UTC `datetime` (for consistent stamping in tests/impl).
+public_router = make_public_router(_internal)
 
-> Keep this module small; add only widely reused, cross-cutting bits.
+Notes
 
-## Types
-- `ProblemDetails`:
-  ```py
-  from dataclasses import dataclass
-  @dataclass(frozen=True)
-  class ProblemDetails:
-      type: str | None
-      title: str
-      status: int
-      detail: str | None = None
-      instance: str | None = None
+This is the only supported import surface of backend.core for other modules.
+
+Internals (e.g., httpkit) are private and may change.
+
