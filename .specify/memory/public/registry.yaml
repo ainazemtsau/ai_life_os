@@ -6,11 +6,6 @@ modules:
     manifest: docs/public/backend.core.api.md
     contract: backend/src/ai_life_backend/contracts/core_protocols.py
     import_hint: from ai_life_backend.core.public import *
-    allowed_dirs:
-      - backend/src/ai_life_backend/core/**
-      - backend/tests/core/**
-      - backend/src/ai_life_backend/contracts/core_protocols.py
-      - docs/public/backend.core.api.md
     uses: ["-"]
     notes: "Cross-cutting primitives (types, errors, small utilities). No domain logic."
 
@@ -20,11 +15,6 @@ modules:
     manifest: docs/public/backend.goals.api.md
     contract: backend/src/ai_life_backend/contracts/goals_openapi.yaml
     import_hint: from ai_life_backend.goals.public import *
-    allowed_dirs:
-      - backend/src/ai_life_backend/goals/**
-      - backend/tests/goals/**
-      - backend/src/ai_life_backend/contracts/goals_openapi.yaml
-      - docs/public/backend.goals.api.md
     uses: ["backend.core"]
     notes: "Goals feature module. HTTP contract via OpenAPI; in-process read-only queries via public port."
 
@@ -34,10 +24,6 @@ modules:
     manifest: docs/public/frontend.design.api.md
     contract: frontend/src/contracts/design.d.ts
     import_hint: import * as design from '@/features/design'
-    allowed_dirs:
-      - frontend/src/features/design/**
-      - frontend/src/contracts/design.d.ts
-      - docs/public/frontend.design.api.md
     uses: ["-"]
     notes: "Foundational design system with no dependencies."
 
@@ -47,10 +33,6 @@ modules:
     manifest: docs/public/frontend.goals.api.md
     contract: frontend/src/contracts/goals.d.ts
     import_hint: import * as goals from '@/features/goals'
-    allowed_dirs:
-      - frontend/src/features/goals/**
-      - frontend/src/contracts/goals.d.ts
-      - docs/public/frontend.goals.api.md
     uses:
       - frontend.design
       - backend.goals
@@ -62,10 +44,6 @@ modules:
     manifest: docs/public/frontend.dashboard.api.md
     contract: frontend/src/contracts/dashboard.d.ts
     import_hint: import * as dashboard from '@/features/dashboard'
-    allowed_dirs:
-      - frontend/src/features/dashboard/**
-      - frontend/src/contracts/dashboard.d.ts
-      - docs/public/frontend.dashboard.api.md
     uses:
       - frontend.design
     notes: "Dashboard page module. Main entry point UI for the application."
@@ -76,11 +54,6 @@ modules:
     manifest: docs/public/frontend.app-shell.api.md
     contract: frontend/src/contracts/app-shell.d.ts
     import_hint: import * as appShell from '@/features/app-shell'
-    allowed_dirs:
-      - frontend/src/features/app-shell/**
-      - frontend/src/contracts/app-shell.d.ts
-      - frontend/src/app/**
-      - docs/public/frontend.app-shell.api.md
     uses:
       - frontend.dashboard
       - frontend.goals
@@ -92,12 +65,6 @@ modules:
     manifest: docs/public/backend.projects.api.md
     contract: backend/src/ai_life_backend/contracts/projects_openapi.yaml
     import_hint: from ai_life_backend.projects.public import *
-    allowed_dirs:
-      - backend/src/ai_life_backend/projects/**
-      - backend/tests/projects/**
-      - backend/src/ai_life_backend/contracts/projects_openapi.yaml
-      - backend/src/ai_life_backend/contracts/projects_protocols.py
-      - docs/public/backend.projects.api.md
     uses:
       - backend.core
     notes: "Projects and Tasks domain module. HTTP contract via OpenAPI; in-process read-only queries via Protocols."
@@ -108,12 +75,6 @@ modules:
     manifest: docs/public/backend.milestones.api.md
     contract: backend/src/ai_life_backend/contracts/milestones_openapi.yaml
     import_hint: from ai_life_backend.milestones.public import *
-    allowed_dirs:
-      - backend/src/ai_life_backend/milestones/**
-      - backend/tests/milestones/**
-      - backend/src/ai_life_backend/contracts/milestones_openapi.yaml
-      - backend/src/ai_life_backend/contracts/milestones_protocols.py
-      - docs/public/backend.milestones.api.md
     uses:
       - backend.core
       - backend.goals
@@ -125,10 +86,6 @@ modules:
     manifest: docs/public/frontend.projects.api.md
     contract: frontend/src/contracts/projects.d.ts
     import_hint: import * as projects from '@/features/projects'
-    allowed_dirs:
-      - frontend/src/features/projects/**
-      - frontend/src/contracts/projects.d.ts
-      - docs/public/frontend.projects.api.md
     uses:
       - frontend.design
       - backend.projects
@@ -140,10 +97,6 @@ modules:
     manifest: docs/public/frontend.milestones.api.md
     contract: frontend/src/contracts/milestones.d.ts
     import_hint: import * as milestones from '@/features/milestones'
-    allowed_dirs:
-      - frontend/src/features/milestones/**
-      - frontend/src/contracts/milestones.d.ts
-      - docs/public/frontend.milestones.api.md
     uses:
       - frontend.design
       - backend.milestones

@@ -1,5 +1,5 @@
 ---
-description: Execute the tasks of a single module in strict TDD order, touching only its allowed_dirs. Produce code, tests, and docs-sync required to reach the module’s Definition of Done.
+description: Execute the tasks of a single module in strict TDD order. Produce code, tests, and docs-sync required to reach the module’s Definition of Done.
 ---
 
 User input:
@@ -25,11 +25,11 @@ Steps
 2) Resolve context (once)
    - Run `.specify/scripts/bash/setup-plan.sh --json` to get { FEATURE_SPEC, SPECS_DIR, BRANCH }.
    - Load `.specify/memory/public/registry.yaml`, find entry for MODULE:
-     * `allowed_dirs`, `manifest`, `contract`, `import_hint`, `semver`, `uses`.
+     * `manifest`, `contract`, `import_hint`, `semver`, `uses`.
    - Load module playbook: `specs/<feature>/tasks.by-module/<MODULE>.md`.
 
 3) Enforce boundaries
-   - All file writes MUST be inside `allowed_dirs` for MODULE.
+   - All file writes MUST be inside MODULE.
    - If a task requires edits outside → create/append `specs/<feature>/handoff.md` with a CDC request and STOP that subtask.
 
 4) Execute Tasks (strict TDD order)
@@ -82,7 +82,7 @@ Steps
 
 7) Output
    - Print a concise summary:
-     * files created/updated (within allowed_dirs),
+     * files created/updated,
      * tests added/updated,
      * whether public surface changed and SemVer bump proposal,
      * any handoff items created.
@@ -92,7 +92,7 @@ Steps
    - Do not mark the module READY; verification is done by `/module-verify`.
 
 Behavior constraints
-- Never edit files outside MODULE’s `allowed_dirs`.
+- Never edit files outside MODULE’s.
 - Never deep-import other module internals; use `import_hint` or HTTP only.
 - Keep changes minimal and test-driven; no speculative features.
 - Prefer small, composable functions (≤40 lines) and clear types.

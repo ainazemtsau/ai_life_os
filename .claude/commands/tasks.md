@@ -19,12 +19,10 @@ Steps
      `<!-- TARGET_MODULES:BEGIN` … `TARGET_MODULES:END -->`
    - ROUTER_OWNER from: `<!-- ROUTER_OWNER: <id> -->`
    If not found → ERROR "plan.md missing Machine-readable Scope".
-3) Load `.specify/memory/public/registry.yaml` to pull import_hint/allowed_dirs for existing modules.
-   - For NEW modules (not in registry), compute defaults:
+3)For NEW modules (not in registry), compute defaults:
      * manifest: `docs/public/<id>.api.md`
      * contract: `frontend/src/contracts/<name>.d.ts` (frontend.*) or `backend/src/ai_life_backend/contracts/<name>_protocols.py` (backend.*)
      * import_hint: namespace style
-     * allowed_dirs defaults per side
 4) Build **Module API Matrix** with ONLY Target Modules. Ensure frontend import hints are namespace style (`import * as <name> from '@/features/<name>'`).
 5) **Preparation**:
    - If any Target Module NOT present in registry → add single task:

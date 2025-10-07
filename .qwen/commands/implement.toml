@@ -42,7 +42,7 @@ ARGUMENTS & DISCOVERY
 ========================
 REGISTRY-DRIVEN CONTEXT (NO DEEP INSPECTION)
 4) Read .specify/memory/public/registry.yaml and locate <MODULE> entry.
-   Extract: allowed_dirs[], import_hint, uses[], manifest, contract, semver.
+   Extract: import_hint, uses[], manifest, contract, semver.
 5) For each module listed in <MODULE>.uses:
    - Load ONLY its manifest and contract files.
    - DO NOT open or scan their source code directories.
@@ -53,7 +53,7 @@ TASK EXECUTION (TDD-first, boundaries enforced)
 7) Parse specs/<FEATURE>/tasks.by-module/<MODULE>-tasks.md:
    - Identify phases (Setup → Tests → Implementation → Integration → Polish → Docs sync).
    - Identify task IDs, [P] markers, explicit file paths, dependencies.
-   - VERIFY that ALL task paths are INSIDE <MODULE>.allowed_dirs. If any path escapes → STOP and request tasks fix.
+   - VERIFY that ALL task paths are INSIDE <MODULE>. If any path escapes → STOP and request tasks fix.
 8) Execute by phases:
    - Tests must be authored to FAIL before implementation (TDD).
    - [P] tasks: run in parallel only if touching different files and with no dependencies.
@@ -86,9 +86,9 @@ HANDOFF INSTEAD OF CROSS-MODULE EDITS
 
 ========================
 SAFETY RAILS (DO NOT BREAK)
-- Never read or modify files outside <MODULE>.allowed_dirs.
+- Never read or modify files outside <MODULE>.
 - Never import from other modules except exactly as stated in their import_hint.
-- Do NOT guess missing paths; per-module tasks must contain explicit file paths inside allowed_dirs.
+- Do NOT guess missing paths; per-module tasks must contain explicit file paths.
 - Enforce Clean Code from constitution: SOLID, no magic values, short functions/files, DRY, KISS.
 - If FEATURE or MODULE cannot be uniquely resolved, STOP and request precise args.
 

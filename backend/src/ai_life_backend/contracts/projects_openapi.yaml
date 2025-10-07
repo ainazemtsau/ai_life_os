@@ -4,11 +4,412 @@ info:
   version: 0.1.0
   description: |
     Public HTTP contract for Projects and Tasks module.
-    Placeholder stub — to be filled during /module-implement.
+    Provides CRUD operations with DAG validation for dependencies.
 servers:
   - url: http://localhost:8000
     description: Local development server
 security: []
-paths: {}
+paths:
+  /api/projects:
+    get:
+      summary: List all projects
+      tags: [projects]
+      responses:
+        '200':
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectResponse'
+    post:
+      summary: Create a new project
+      tags: [projects]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '422':
+          description: Validation error (e.g., cycle detected)
+  /api/projects/{project_id}:
+    get:
+      summary: Get project by ID
+      tags: [projects]
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Project found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '404':
+          description: Project not found
+    put:
+      summary: Update a project
+      tags: [projects]
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '404':
+          description: Project not found
+        '422':
+          description: Validation error
+    delete:
+      summary: Delete a project
+      tags: [projects]
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Project deleted
+        '404':
+          description: Project not found
+  /api/tasks:
+    get:
+      summary: List all tasks
+      tags: [tasks]
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResponse'
+    post:
+      summary: Create a new task
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '422':
+          description: Validation error (e.g., cycle or cross-project dependency)
+  /api/tasks/{task_id}:
+    get:
+      summary: Get task by ID
+      tags: [tasks]
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task not found
+    put:
+      summary: Update a task
+      tags: [tasks]
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task not found
+        '422':
+          description: Validation error
+    delete:
+      summary: Delete a task
+      tags: [tasks]
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Task deleted
+        '404':
+          description: Task not found
 components:
-  schemas: {}
+  schemas:
+    ProjectCreate:
+      type: object
+      required: [title, priority, scope, risk]
+      properties:
+        goal_id:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        status:
+          type: string
+          enum: [todo, doing, done, blocked]
+          default: todo
+        priority:
+          type: string
+          enum: [P0, P1, P2, P3]
+        scope:
+          type: string
+        risk:
+          type: string
+          enum: [green, yellow, red]
+        tags:
+          type: array
+          items:
+            type: string
+          default: []
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: uuid
+          default: []
+    ProjectUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        status:
+          type: string
+          enum: [todo, doing, done, blocked]
+        priority:
+          type: string
+          enum: [P0, P1, P2, P3]
+        scope:
+          type: string
+        risk:
+          type: string
+          enum: [green, yellow, red]
+        tags:
+          type: array
+          items:
+            type: string
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: uuid
+    ProjectResponse:
+      type: object
+      required: [id, title, status, priority, scope, risk, tags, dependencies, date_created, date_updated]
+      properties:
+        id:
+          type: string
+          format: uuid
+        goal_id:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+        status:
+          type: string
+          enum: [todo, doing, done, blocked]
+        priority:
+          type: string
+          enum: [P0, P1, P2, P3]
+        scope:
+          type: string
+        risk:
+          type: string
+          enum: [green, yellow, red]
+        tags:
+          type: array
+          items:
+            type: string
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: uuid
+        date_created:
+          type: string
+          format: date-time
+        date_updated:
+          type: string
+          format: date-time
+    TaskCreate:
+      type: object
+      required: [project_id, title, size, energy, continuity, clarity, risk]
+      properties:
+        project_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        status:
+          type: string
+          enum: [todo, doing, done, blocked]
+          default: todo
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: uuid
+          default: []
+        size:
+          type: string
+          enum: [XS, S, M, L, XL]
+        energy:
+          type: string
+          enum: [Deep, Focus, Light]
+        continuity:
+          type: string
+          enum: [chain, linked, puzzle]
+        clarity:
+          type: string
+          enum: [clear, cloudy, unknown]
+        risk:
+          type: string
+          enum: [green, yellow, red]
+        context:
+          type: string
+          default: ''
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        status:
+          type: string
+          enum: [todo, doing, done, blocked]
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: uuid
+        size:
+          type: string
+          enum: [XS, S, M, L, XL]
+        energy:
+          type: string
+          enum: [Deep, Focus, Light]
+        continuity:
+          type: string
+          enum: [chain, linked, puzzle]
+        clarity:
+          type: string
+          enum: [clear, cloudy, unknown]
+        risk:
+          type: string
+          enum: [green, yellow, red]
+        context:
+          type: string
+    TaskResponse:
+      type: object
+      required: [id, project_id, title, status, dependencies, size, energy, continuity, clarity, risk, context, date_created, date_updated]
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+          enum: [todo, doing, done, blocked]
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: uuid
+        size:
+          type: string
+          enum: [XS, S, M, L, XL]
+        energy:
+          type: string
+          enum: [Deep, Focus, Light]
+        continuity:
+          type: string
+          enum: [chain, linked, puzzle]
+        clarity:
+          type: string
+          enum: [clear, cloudy, unknown]
+        risk:
+          type: string
+          enum: [green, yellow, red]
+        context:
+          type: string
+        date_created:
+          type: string
+          format: date-time
+        date_updated:
+          type: string
+          format: date-time

@@ -785,7 +785,6 @@ Each `@module(<name>)` task will spawn detailed steps in module-specific task fi
   - Expands T010-T018, T040-T049, T050, T052, T060, T063, T064
   - File-level steps with exact paths in `backend/src/ai_life_backend/goals/`
   - TDD enforcement (tests must fail first)
-  - Respects `allowed_dirs` from registry
 
 - **`tasks.by-module/frontend.design-tasks.md`**
   - Expands T020-T026, T062

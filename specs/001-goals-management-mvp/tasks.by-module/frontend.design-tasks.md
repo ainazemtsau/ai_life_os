@@ -855,7 +855,6 @@ wait
 After completing all frontend.design tasks:
 - [ ] All 6 components implemented (Button, Dialog, Input, Label, Card, Badge)
 - [ ] cn utility working
-- [ ] All files within `allowed_dirs` (frontend/src/features/design/**)
 - [ ] TypeScript check passes: `cd frontend && pnpm typecheck`
 - [ ] Barrel export functional: `import * as design from '@/features/design'`
 - [ ] Contract matches implementation

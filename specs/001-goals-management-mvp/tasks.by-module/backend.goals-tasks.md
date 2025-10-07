@@ -175,7 +175,6 @@ touch tests/goals/{contract,integration,unit}/__init__.py
 **Acceptance Criteria**:
 - [ ] All directories exist
 - [ ] All `__init__.py` files created
-- [ ] Directory structure matches allowed_dirs from registry
 
 ---
 

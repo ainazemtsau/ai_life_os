@@ -9,13 +9,12 @@
 
 **Rules**
 - Treat all dependencies as opaque: use their MANIFEST/CONTRACT only; do not read their sources.
-- Respect `allowed_dirs` boundaries for `<module-id>`.
 - If dependent API is missing → append a HANDOFF to `specs/<feature-id>/handoff.md` for the owner module.
 
 **Expand**
 - Generate detailed tasks in `specs/<feature-id>/tasks.by-module/<module-id>-tasks.md`:
   - Phases: Setup → Tests → Implementation → Integration → Polish → **Docs sync**
-  - Each task must include concrete file paths inside `allowed_dirs`.
+  - Each task must include concrete file paths.
   - **Docs sync** must include:
     - Update MANIFEST (add/change exports)
     - Update CONTRACT (.d.ts/Protocol)

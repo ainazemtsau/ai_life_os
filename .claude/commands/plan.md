@@ -42,7 +42,6 @@ Steps
      - Respect explicit constraints from the spec (e.g., "frontend-only" → do **not** include backend modules as targets).
 
 6) Determine **ROUTER_OWNER**
-   - Prefer a module whose `allowed_dirs` include `frontend/src/app/**` (if present in registry).
    - Else, if a module named `frontend.app-shell` is in the target set → use it.
    - Else, omit and do not emit router integration steps (record rationale in notes).
 

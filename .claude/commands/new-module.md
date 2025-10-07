@@ -24,9 +24,6 @@ Behavior
    - import_hint:
      * frontend.* → import * as <name> from '@/features/<name>'
      * backend.*  → from ai_life_backend.<name>.public import *
-   - allowed_dirs:
-     * frontend.* → frontend/src/features/<name>/**, frontend/src/contracts/<name>.d.ts, docs/public/<id>.api.md
-     * backend.*  → backend/src/ai_life_backend/<name>/**, backend/tests/<name>/**
    - uses: from `uses="a,b,c"` if provided, else [].
    - Special cases:
      * frontend.app-shell additionally owns frontend/src/app/**

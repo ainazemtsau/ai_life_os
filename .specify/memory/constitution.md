@@ -14,7 +14,6 @@ Each module entry MUST define:
   - Backend in-process: Python Protocols in `backend/src/.../contracts/*.py`
   - Frontend: `frontend/src/contracts/*.d.ts`
 - `import_hint` (how consumers import public in-process API)
-- `allowed_dirs` (paths the assistant may touch)
 - `uses` (dependencies by module id)
 
 **Rules:**
@@ -70,7 +69,7 @@ We support two kinds of public interfaces:
 6. `/plan` (thin) → scope, **no hardcoded modules**, link ADR/spike; re-use registry.
 7. `/tasks` → generate `tasks.md` + `tasks.by-module/*.md` (playbooks with DoD).
 8. `/fanout-tasks <feature-id>` → sync global → per-module **FANOUT** blocks.
-9. `/module-implement MODULE=<id>` → TDD implementation **only in allowed_dirs**.
+9. `/module-implement MODULE=<id>` → TDD implementation.
 10. `/module-verify MODULE=<id>` → quality gates, READY report (or BLOCKED).
 11. Manual commit (use suggested Conventional Commit).
 

@@ -1144,7 +1144,6 @@ After completing all frontend.goals tasks:
 - [ ] SWR caching and revalidation functional
 - [ ] Optimistic updates working
 - [ ] Next.js page at /goals route functional
-- [ ] All files within `allowed_dirs` (frontend/src/features/goals/**)
 - [ ] TypeScript check passes: `cd frontend && pnpm typecheck`
 - [ ] Barrel export functional: `import * from '@/features/goals'`
 - [ ] Contract matches implementation

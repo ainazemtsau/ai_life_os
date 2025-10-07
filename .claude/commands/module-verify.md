@@ -23,7 +23,7 @@ Steps
 2) Resolve context
    - `.specify/scripts/bash/setup-plan.sh --json` → { SPECS_DIR, BRANCH }.
    - Load `.specify/memory/public/registry.yaml` → read entry for MODULE:
-     * `allowed_dirs`, `manifest`, `contract`, `import_hint`, `semver`, `uses`.
+     , `manifest`, `contract`, `import_hint`, `semver`, `uses`.
 
 3) Contracts
    - If `contract` ends with `.yaml` or `.yml` (OpenAPI):
@@ -70,7 +70,7 @@ Steps
    - If your registry validator rejects extra fields, skip this step and only print the report.
 
 Behavior constraints
-- Scope everything to MODULE’s `allowed_dirs`.
+- Scope everything to MODULE’s`.
 - Do not auto-edit other modules; instead, emit **handoff** suggestions.
 
 Suggested next step

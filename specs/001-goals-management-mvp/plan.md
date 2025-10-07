@@ -53,12 +53,6 @@ See "Phase 2: Task Planning Approach" section below. `/tasks` command will gener
 
 > Authoritative module boundaries. Public surfaces only. Internals (domain/app/infra/api) are private to each module.
 
-| Module ID | Kind | Provides (public surface) | Uses | Manifest Path | Contract Path | allowed_dirs (summary) | import_hint | SemVer |
-|-----------|------|--------------------------|------|---------------|---------------|----------------------|-------------|--------|
-| **frontend.design** | ts | Design system components (Button, Dialog, Input, Label, Card, Badge) + cn utility | `-` (foundational) | `.specify/memory/public/frontend.design.api.md` | `frontend/src/contracts/design.d.ts` | `frontend/src/features/design/**` | `import * as design from '@/features/design'` | 0.1.0 |
-| **backend.goals** | py | HTTP API (OpenAPI) for goals CRUD | `-` (foundational feature) | `.specify/memory/public/backend.goals.api.md` | `backend/src/ai_life_backend/contracts/goals_contracts.py` (Protocol) + `goals_openapi.yaml` (HTTP) | `backend/src/ai_life_backend/goals/**`, `backend/tests/goals/**` | `from ai_life_backend.goals.public import goals` | 0.1.0 |
-| **frontend.goals** | ts | Feature UI (GoalList, GoalForm, GoalItem components + useGoals, useGoal, useGoalMutations hooks) | `frontend.design`, `backend.goals` (HTTP only) | `.specify/memory/public/frontend.goals.api.md` | `frontend/src/contracts/goals.d.ts` | `frontend/src/features/goals/**` | `import * as goals from '@/features/goals'` | 0.1.0 |
-
 **Design Rationale**:
 - Modules are bounded contexts with clear external contracts
 - Internals stay private (domain/repository/service/api layers are implementation details)
@@ -275,7 +269,7 @@ Setup → Database Schema → Domain → Repository → Services → API → Fro
 ### Module Fanout
 
 `/fanout-tasks 001-goals-management-mvp` will generate:
-- `tasks.by-module/backend.goals-tasks.md` (backend tasks within `allowed_dirs`)
+- `tasks.by-module/backend.goals-tasks.md` (backend tasks)
 - `tasks.by-module/frontend.goals-tasks.md` (frontend goals tasks)
 - `tasks.by-module/frontend.design-tasks.md` (design system tasks)
 
@@ -314,7 +308,6 @@ Consumers request changes via handoff notes; providers evolve contracts safely. 
 
 ### No Cross-Module Source Reading
 - Imports follow `import_hint` from registry
-- Changes only within `allowed_dirs`
 - Deep imports prohibited
 
 ### Clean Code (NON-NEGOTIABLE)

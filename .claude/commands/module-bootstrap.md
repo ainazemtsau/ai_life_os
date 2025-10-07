@@ -20,7 +20,6 @@ Goal
   * Add entry to `.specify/memory/public/registry.yaml`
   * Create public manifest in `docs/public/<id>.api.md`
   * Create language contract (TS .d.ts / Python protocol) at the path recorded in registry
-  * Create directory scaffolds for all `allowed_dirs`
   * Run validators and print a concise summary
 
 Inputs discovery
@@ -51,9 +50,6 @@ Defaults (unless a module profile is known)
 - import_hint:
   * frontend.* → `import * as <name> from '@/features/<name>'`
   * backend.*  → `from ai_life_backend.<name>.public import *`
-- allowed_dirs:
-  * frontend.* → `frontend/src/features/<name>/**`, `frontend/src/contracts/<name>.d.ts`, `docs/public/<id>.api.md`
-  * backend.*  → `backend/src/ai_life_backend/<name>/**`, `backend/tests/<name>/**`
 
 Special profiles (hardcoded)
 - `frontend.app-shell` additionally owns `frontend/src/app/**` (Next.js App Router glue)
@@ -66,11 +62,11 @@ Uses resolution (priority)
 Procedure
 1) Run `.specify/scripts/bash/setup-plan.sh --json` to discover repo/feature context (for logging only)
 2) Load and parse `.specify/memory/public/registry.yaml`
-3) Build a creation plan for each target module (kind, manifest, contract, import_hint, allowed_dirs, uses)
+3) Build a creation plan for each target module (kind, manifest, contract, import_hint,uses)
 4) For each target module:
    - If already present in registry → report "present" and skip creation (unless FORCE and stubs are empty)
    - Insert/Update registry entry fields:
-     * kind, semver (`0.1.0` if new), manifest, contract, import_hint, allowed_dirs, uses, notes
+     * kind, semver (`0.1.0` if new), manifest, contract, import_hint, uses, notes
    - Create parent folders as needed
    - Create `docs/public/<id>.api.md` with this minimal stub (if not exists or FORCE):
      ```
@@ -115,7 +111,6 @@ Procedure
        class ExampleProtocol(Protocol):
            ...
        ```
-   - Create empty folders for each `allowed_dirs` (no code files yet)
 5) Write back updated `registry.yaml` atomically
 6) Run validators:
 python .specify/scripts/registry_validate.py
@@ -124,7 +119,7 @@ python .specify/scripts/manifest_lint.py
 sql
 Копировать код
 7) Output summary:
-- Table of modules (created/present/updated), manifest paths, contract paths, allowed_dirs roots
+- Table of modules (created/present/updated), manifest paths, contract paths, roots
 - If DRY_RUN=1 → print planned actions only
 - Next suggested command:
   * `/fanout-tasks <feature-id>` if FROM_TASKS was used

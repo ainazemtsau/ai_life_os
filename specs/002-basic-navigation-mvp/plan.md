@@ -49,7 +49,6 @@ Freeze high-level design for this feature using **contracts-first**. The templat
    - Create public manifest at `docs/public/frontend.app-shell.api.md`
    - Define contract: `frontend/src/contracts/app-shell.d.ts`
    - Scaffold folder: `frontend/src/features/app-shell/`
-   - Define `allowed_dirs` to include `frontend/src/app/**` (Next.js routing)
 
 3. **Define public contracts**
    - Dashboard: page component type, props interface
