@@ -1,0 +1,61 @@
+description = "Implement a module strictly within allowed_dirs, update public docs, and WRITE PROGRESS back to tasks and a feature-level progress log."
+
+prompt = """
+# Usage
+#   /module-implement MODULE=<id> [FEATURE=<feature-id>] [ONLY=contract|tests|impl|docs]
+# Behavior:
+#   - If FEATURE not provided: auto-detect via .specify/scripts/bash/setup-plan.sh --json
+#   - If per-module playbook missing: run /fanout-tasks <feature-id> first (only for Target Modules)
+#   - Execute the next logical chunk (contract → tests → implementation → docs) unless ONLY=… limits scope
+#   - Update progress checkboxes and logs for all steps actually performed in THIS run
+
+User input:
+
+{{args}}
+
+Goals
+- Perform module implementation steps WITHOUT crossing module boundaries (respect allowed_dirs from registry.yaml).
+- Keep code minimal and clean (SOLID/DRY/KISS). Tests-first where applicable.
+- Sync public docs (manifest + contract) when exports change.
+- Persist PROGRESS for visibility:
+  - Update checkboxes in:
+    * specs/<feature>/tasks.md (T-ids with @module(<id>))
+    * specs/<feature>/tasks.by-module/<module>.md (MT-ids)
+  - Update or create:
+    * specs/<feature>/progress.md (human table + run log)
+    * specs/<feature>/progress.json (machine state)
+
+Steps
+1) Discover feature context
+   - Run the discovery script and capture JSON for the model to reason on:
+
+     !{.specify/scripts/bash/setup-plan.sh --json}
+
+   - Parse FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH from that JSON.
+   - If FEATURE=<id> provided via args, ensure it matches the discovered directory.
+
+2) Validate module <id>
+   - Read specs/<feature>/plan.md and extract:
+     * target list from <!-- TARGET_MODULES:BEGIN ... END -->
+     * router-owner (if relevant)
+   - If <id> not in TARGET_MODULES → ERROR (do not implement context modules here).
+
+3) Ensure per-module playbook exists
+   - Path: specs/<feature>/tasks.by-module/<module>.md
+   - If missing → run the fanout command for Target Modules, then continue:
+     - If an internal /fanout-tasks command exists, invoke it, or otherwise perform the equivalent generation procedure.
+
+4) Load registry entry for <id> from .specify/memory/public/registry.yaml (or docs/public/registry.yaml, per project).
+   - Capture allowed_dirs, contract, manifest, import_hint, semver.
+
+5) Decide execution scope
+   - If ONLY=… → limit steps to that scope.
+   - Default order to attempt:
+     a) contract (create/update .d.ts or protocol stubs)
+     b) tests (write failing tests)
+     c) implementation (code to pass tests)
+     d) docs (sync manifest with public API)
+
+6) Execute within allowed_dirs
+   - Write/update files only in allowed_dirs, contract, manifest.
+   - Respect “public surface
