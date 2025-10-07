@@ -1,0 +1,14 @@
+openapi: 3.1.0
+info:
+  title: Projects & Tasks API
+  version: 0.1.0
+  description: |
+    Public HTTP contract for Projects and Tasks module.
+    Placeholder stub — to be filled during /module-implement.
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+security: []
+paths: {}
+components:
+  schemas: {}

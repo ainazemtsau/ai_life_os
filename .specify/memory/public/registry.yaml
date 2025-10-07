@@ -85,3 +85,67 @@ modules:
       - frontend.dashboard
       - frontend.goals
     notes: "App shell and routing module. Owns Next.js App Router glue (frontend/src/app/**)."
+
+  backend.projects:
+    kind: python
+    semver: 0.1.0
+    manifest: docs/public/backend.projects.api.md
+    contract: backend/src/ai_life_backend/contracts/projects_openapi.yaml
+    import_hint: from ai_life_backend.projects.public import *
+    allowed_dirs:
+      - backend/src/ai_life_backend/projects/**
+      - backend/tests/projects/**
+      - backend/src/ai_life_backend/contracts/projects_openapi.yaml
+      - backend/src/ai_life_backend/contracts/projects_protocols.py
+      - docs/public/backend.projects.api.md
+    uses:
+      - backend.core
+    notes: "Projects and Tasks domain module. HTTP contract via OpenAPI; in-process read-only queries via Protocols."
+
+  backend.milestones:
+    kind: python
+    semver: 0.1.0
+    manifest: docs/public/backend.milestones.api.md
+    contract: backend/src/ai_life_backend/contracts/milestones_openapi.yaml
+    import_hint: from ai_life_backend.milestones.public import *
+    allowed_dirs:
+      - backend/src/ai_life_backend/milestones/**
+      - backend/tests/milestones/**
+      - backend/src/ai_life_backend/contracts/milestones_openapi.yaml
+      - backend/src/ai_life_backend/contracts/milestones_protocols.py
+      - docs/public/backend.milestones.api.md
+    uses:
+      - backend.core
+      - backend.goals
+    notes: "Milestones domain module. HTTP contract via OpenAPI; in-process read-only queries via Protocols."
+
+  frontend.projects:
+    kind: typescript
+    semver: 0.1.0
+    manifest: docs/public/frontend.projects.api.md
+    contract: frontend/src/contracts/projects.d.ts
+    import_hint: import * as projects from '@/features/projects'
+    allowed_dirs:
+      - frontend/src/features/projects/**
+      - frontend/src/contracts/projects.d.ts
+      - docs/public/frontend.projects.api.md
+    uses:
+      - frontend.design
+      - backend.projects
+    notes: "Projects and Tasks UI module. List pages, CRUD forms, dependency selectors, API client hooks."
+
+  frontend.milestones:
+    kind: typescript
+    semver: 0.1.0
+    manifest: docs/public/frontend.milestones.api.md
+    contract: frontend/src/contracts/milestones.d.ts
+    import_hint: import * as milestones from '@/features/milestones'
+    allowed_dirs:
+      - frontend/src/features/milestones/**
+      - frontend/src/contracts/milestones.d.ts
+      - docs/public/frontend.milestones.api.md
+    uses:
+      - frontend.design
+      - backend.milestones
+      - backend.goals
+    notes: "Milestones UI module. List page, CRUD forms, Goal selector, API client hooks."
