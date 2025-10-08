@@ -1,78 +1,54 @@
 ---
-description: Run quality gates for a single module and emit a READY report (or BLOCKED). Updates docs, suggests SemVer bump and a Conventional Commit message.
+description: Verify a module (lint, types, tests, boundaries), mark it VERIFIED on success, and WRITE PROGRESS back to tasks and the feature progress log.
 ---
+
+# Usage
+#   /module-verify MODULE=<id> [FEATURE=<feature-id>]
+# Behavior:
+#   - Validates docs-as-code (registry/manifest), lints/types/tests for the module scope.
+#   - On success, marks the module’s “Verify” tasks done and sets status=verified in progress.
+#   - On failure, marks status=blocked with a short reason.
 
 User input:
 
 $ARGUMENTS
-# Expected: MODULE=<module-id> [FIX=1]
 
-Goal
-- Validate that the module meets its Definition of Done (tests, lint, contracts, docs-sync).
-- If FIX=1, allow minor auto-fixes (e.g., regenerate OpenAPI, re-run linters format).
-
-Preconditions
-- `/tasks` and `/fanout-tasks` completed (module playbook present).
-- Implementation has been attempted via `/module-implement` (not strictly enforced).
+Checks (adapt to your project)
+- boundaries: imports use only public surfaces (scan for deep imports)
+- docs: `.specify/scripts/registry_validate.py`, `.specify/scripts/manifest_lint.py`
+- **Quality Assurance**: `make qa` - runs all checks (typecheck, lint, format, tests)
+  - **CRITICAL**: ALL errors MUST be fixed by modifying code
+  - **FORBIDDEN**: Disabling rules with comments (eslint-disable, @ts-ignore, etc.)
+  - **FORBIDDEN**: Lowering quality standards or ignoring errors
+  - Only acceptable: warnings for form complexity in production code
+- backend tests (if python module): `pytest -q` (module-selective)
 
 Steps
+1) Discover feature context
+   - `.specify/scripts/bash/setup-plan.sh --json` → parse `FEATURE_SPEC`, `IMPL_PLAN`, `SPECS_DIR`, `BRANCH`.
+2) Validate module `<id>` belongs to TARGET_MODULES (from plan.md).
+3) Run verifications (only for this module's paths)
+   - Run `make qa` to check formatting, linting, types, and tests
+   - **If ANY error found**: FIX the code, NEVER disable checks or add ignore comments
+   - Re-run `make qa` until ALL errors are resolved (0 errors)
+   - If any check fails after fixes → module stays blocked
+4) Update PROGRESS
+   - If all checks PASS:
+     * In `specs/<feature>/tasks.md`: mark the line “Verify <module> module” for this module as `- [x] ... (done: YYYY-MM-DD)`, if present.
+     * In `specs/<feature>/tasks.by-module/<module>.md`: mark the Verify task (e.g., `MT… Verify module`) as done with date.
+     * Update `specs/<feature>/progress.json`:
+       - `modules["<module>"].status = "verified"`
+       - `last_run = <ISO8601>`
+     * Update/insert row in `specs/<feature>/progress.md` table: Status → **verified**, update counts and timestamp.
+     * Append Run Log with “VERIFY PASSED”.
+   - If any check FAILS:
+     * Do **not** tick Verify tasks.
+     * Update `progress.json` with `status = "blocked"`, `last_run`, and `error_summary`.
+     * Update/insert row in `progress.md`: Status → **blocked**; add brief reason under a “Run Log” entry (“VERIFY FAILED: …”).
+5) Output concise Summary:
+   - PASS/FAIL, which checks ran, updated tasks (T/MT IDs), new status, next suggested command.
 
-1) Parse arguments
-   - Extract `MODULE` (required). If missing → ERROR.
-
-2) Resolve context
-   - `.specify/scripts/bash/setup-plan.sh --json` → { SPECS_DIR, BRANCH }.
-   - Load `.specify/memory/public/registry.yaml` → read entry for MODULE:
-     * `allowed_dirs`, `manifest`, `contract`, `import_hint`, `semver`, `uses`.
-
-3) Contracts
-   - If `contract` ends with `.yaml` or `.yml` (OpenAPI):
-     * (Re)generate spec if FIX=1 (e.g., `python backend/scripts/export_openapi.py`).
-     * Lint: `npx @redocly/cli lint <contract>`.
-     * Fail if errors present → **BLOCKED: contract**.
-   - Else (in-process port / protocols):
-     * Run `.specify/scripts/manifest_lint.py` (if available) to check manifest vs exported symbols.
-     * Optionally import module with `import_hint` in a dry-run to ensure symbols exist.
-
-4) Docs sync
-   - Ensure `.specify/memory/public/<MODULE>.api.md` reflects current public exports (types, usage, changelog):
-     * If mismatch detected and FIX=1 → update sections; else → **BLOCKED: docs-sync**.
-   - If public surface changed:
-     * Propose SemVer bump: MAJOR | MINOR | PATCH (determine from diff type).
-     * Write proposal at the end of the READY report.
-
-5) Gate: cross-artifact validators
-   - `python .specify/scripts/registry_validate.py`
-   - `python .specify/scripts/manifest_lint.py`
-   - If fail → **BLOCKED: docs gates**.
-
-6) READY report
-   - When all gates pass: print
-     * `Module: <MODULE>`
-     * `SemVer: <old> -> <new or unchanged>`
-     * `Tests: PASS`, `Lint/Types: PASS`, `Contract: PASS`, `Docs-sync: PASS`
-     * Suggested commit message (Conventional Commits):
-       ```
-       feat(<MODULE>): complete module playbook to READY [public-api]
-       
-       - tests: add contract/integration/unit
-       - impl: [short summary]
-       - docs: manifest sync, OpenAPI lint
-       - semver: <old> -> <new>
-       ```
-   - If any gate fails: list **BLOCKED reasons** with minimal actionable hints.
-
-7) Optional registry status update (if your validator allows it)
-   - (If you keep status fields) set:
-     * `status: ready`
-     * `last_verified: <YYYY-MM-DD>`
-     * `last_contract_sha: <calculated or left blank>`
-   - If your registry validator rejects extra fields, skip this step and only print the report.
-
-Behavior constraints
-- Scope everything to MODULE’s `allowed_dirs`.
-- Do not auto-edit other modules; instead, emit **handoff** suggestions.
-
-Suggested next step
-- If READY: commit manually with the suggested message.
-- Else: run `/module-implement MODULE=<MODULE>` to address BLOCKED items.
+Guards
+- Do not silently mark tasks done on failure.
+- Do not touch unrelated modules’ rows.
+- Keep messages short; progress files are the durable source of truth.

@@ -42,7 +42,7 @@ def main() -> None:
         err("modules must be a dict")
 
     for mid, m in modules.items():
-        for k in ("kind", "semver", "manifest", "contract", "import_hint", "allowed_dirs", "uses"):
+        for k in ("kind", "semver", "manifest", "contract", "import_hint", "uses"):
             if m.get(k) in (None, []):
                 err(f"{mid}: missing or empty '{k}'")
         if not SEMVER_RE.match(m["semver"]):
@@ -53,11 +53,6 @@ def main() -> None:
             err(f"{mid}: manifest not found at {man}")
         if not con.exists():
             err(f"{mid}: contract not found at {con}")
-        # allowed_dirs exist? (we just check that parent dirs exist)
-        for g in m["allowed_dirs"]:
-            root = repo / g.split("/")[0]
-            if not (root.exists() or str(root) == "."):
-                err(f"{mid}: allowed_dirs root '{root}' not found")
 
     print(json.dumps({"ok": True, "modules": list(modules.keys())}))
 

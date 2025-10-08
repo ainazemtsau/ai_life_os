@@ -166,7 +166,6 @@ uv run python -c "from ai_life_backend.goals.public import goals_router"
 
 ✅ **Registry Compliance**:
 - Contract file exists at specified path
-- All files within `allowed_dirs` (backend/src/ai_life_backend/goals/**)
 - Uses only allowed dependencies (none for foundational module)
 - Public facade follows `import_hint` pattern
 

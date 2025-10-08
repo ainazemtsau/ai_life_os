@@ -1,0 +1,118 @@
+# Qwen Code custom command: /module-implement
+# Usage from chat:
+#   /module-implement MODULE=<id> [FEATURE=<feature-id>] [ONLY=contract|tests|impl|docs]
+# Example:
+#   /module-implement MODULE=frontend.design FEATURE=001-two-mods
+
+name = "module-implement"
+description = "Implement a module strictly within allowed_dirs, update public docs, and write PROGRESS to tasks + feature-level logs."
+
+# Qwen will append user-supplied arguments into {{input}} (your environment uses this placeholder).
+# If your build expects {{args}} instead, replace {{input}} -> {{args}} (per official docs). 
+# Both forms are supported depending on build. 
+# Ref: Custom Commands, file locations, naming, {{args}} handling, and !{...} shell injection. 
+# (Docs also allow leaving out the placeholder: then Qwen appends the raw command after two newlines.)
+# See citations after the block.
+
+prompt = """
+You are the code assistant executing **module implementation** under the Spec Kit workflow.
+You MUST stay within the module’s allowed directories and never read/modify sources of other modules.
+Use only Public API manifests & language contracts.
+
+User input (parse this first):
+{{input}}
+
+========================
+USAGE & BEHAVIOR
+- If FEATURE is omitted: auto-detect via `.specify/scripts/bash/setup-plan.sh --json`
+- If per-module playbook is missing: run `/fanout-tasks <feature-id>` first (Target Modules only)
+- Execute the next logical chunk unless ONLY=… limits scope:
+  contract → tests → implementation → docs
+- Update checkboxes/logs ONLY for steps actually performed in THIS run
+
+========================
+GOALS
+- Implement WITHOUT crossing module boundaries (respect `allowed_dirs` from registry.yaml).
+- Keep code minimal & clean (SOLID/DRY/KISS). Prefer tests-first where applicable.
+- Sync public docs (manifest + contract) when exports change.
+- Persist PROGRESS for visibility:
+  * Update checkboxes:
+    - specs/<feature>/tasks.md  (T-ids with @module(<id>))
+    - specs/<feature>/tasks.by-module/<module>.md  (MT-ids)
+  * Update or create:
+    - specs/<feature>/progress.md   (human table + run log)
+    - specs/<feature>/progress.json (machine state)
+
+========================
+STEPS
+1) Discover feature context
+   - Run the discovery script and capture JSON (Qwen will ask to confirm shell runs):
+     !{.specify/scripts/bash/setup-plan.sh --json}
+   - Parse FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH.
+   - If FEATURE=<id> is provided in args, verify it matches discovered dir.
+
+2) Validate module <id>
+   - Read specs/<feature>/plan.md and extract:
+     - TARGET_MODULES from <!-- TARGET_MODULES:BEGIN ... END -->
+     - router-owner (if relevant)
+   - If <id> NOT in TARGET_MODULES → STOP with clear ERROR.
+
+3) Ensure per-module playbook exists
+   - Path: specs/<feature>/tasks.by-module/<module>.md   (or <module>-tasks.md if that’s your convention)
+   - If missing → run `/fanout-tasks <feature>` to generate Target Modules, then continue.
+
+4) Load registry entry for <id>
+   - From .specify/memory/public/registry.yaml (or docs/public/registry.yaml, per project).
+   - Capture: allowed_dirs, contract, manifest, import_hint, semver.
+
+5) Decide execution scope
+   - Respect ONLY=contract|tests|impl|docs if provided.
+   - Default order: (a) contract  (b) tests  (c) implementation  (d) docs
+
+6) Execute strictly within allowed_dirs
+   - Read/write ONLY inside: allowed_dirs, contract, manifest.
+   - Respect “public surface only” imports (use import_hint).
+   - Keep code small, typed, with explicit boundaries.
+
+7) Update PROGRESS (very important)
+   - Mark DONE T-ids in specs/<feature>/tasks.md with @module(<id>) that match steps done now.
+     Replace "- [ ]" → "- [x]" and append " (done: YYYY-MM-DD)".
+   - Mark DONE MT-ids in specs/<feature>/tasks.by-module/<module>.md similarly.
+   - Update/Create specs/<feature>/progress.json (merge if exists; update ONLY current module):
+     {
+       "feature": "<feature-id>",
+       "updated_at": "<ISO8601>",
+       "modules": {
+         "<module-id>": {
+           "status": "in_progress",
+           "last_run": "<ISO8601>",
+           "done_ids": ["Txxx","MTyyy", "..."],
+           "totals": {"global": {"done": n, "total": N}, "module": {"done": m, "total": M}}
+         }
+       }
+     }
+   - Update/Create specs/<feature>/progress.md:
+     - Ensure table exists:
+       | Module | Status | Global tasks (done/total) | Module tasks (done/total) | Last run |
+       |--------|--------|---------------------------|----------------------------|----------|
+     - Replace the row for <module-id> or append it with computed counts + timestamp.
+     - Append a “Run Log”:
+       ### Run YYYY-MM-DD HH:MM
+       - module: <module-id>
+       - steps: contract? tests? impl? docs?
+       - files touched: <short list>
+       - notes: <short note>
+
+8) Output a concise SUMMARY to chat:
+   - Module, steps performed, changed files, updated task IDs, progress counts, next recommended command.
+
+========================
+VALIDATION & GUARDS
+- Do NOT edit outside allowed_dirs/contract/manifest.
+- Do NOT mark “Verify module” as done (belongs to /module-verify).
+- If tests fail after implementation → set status "blocked" in progress and include a short failure summary.
+
+Notes
+- Idempotent: re-runs only mark newly completed steps.
+- Keep each step’s changes atomic (repo commit itself is out of scope).
+"""

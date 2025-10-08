@@ -103,7 +103,6 @@ def main():
         "manifest": str(manifest_path.relative_to(REPO)).replace("\\","/"),
         "contract": str(contract_path.relative_to(REPO)).replace("\\","/"),
         "import_hint": import_hint,
-        "allowed_dirs": allowed,
         "uses": uses,
         "notes": "",
     }

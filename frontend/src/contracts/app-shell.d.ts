@@ -32,3 +32,21 @@ export const DashboardRoute: React.FC;
  * Wraps GoalsPage from frontend.goals module
  */
 export const GoalsRoute: React.FC;
+
+/**
+ * Milestones route component
+ * Wraps MilestonesList from frontend.milestones module
+ */
+export const MilestonesRoute: React.FC;
+
+/**
+ * Projects route component
+ * Wraps ProjectsList from frontend.projects module
+ */
+export const ProjectsRoute: React.FC;
+
+/**
+ * Tasks route component
+ * Wraps TasksList from frontend.projects module
+ */
+export const TasksRoute: React.FC;

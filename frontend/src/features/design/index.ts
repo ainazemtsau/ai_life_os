@@ -21,4 +21,11 @@ export {
   CardContent,
 } from "./components/card";
 export { Badge, badgeVariants, type BadgeProps } from "./components/badge";
+export {
+  DataTable,
+  type DataTableProps,
+  type DataTableColumn,
+  type DataTableCellContext,
+  type DataTableColumnHeaderContext,
+} from "./components/table";
 export { cn } from "./utils/cn";

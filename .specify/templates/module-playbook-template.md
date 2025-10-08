@@ -3,9 +3,7 @@
 **Kind**: [KIND] | **SemVer**: [SEMVER]  
 **Manifest**: [MANIFEST_PATH]  
 **Contract**: [CONTRACT_PATH]  
-**Import hint**: `[IMPORT_HINT]`  
-**Allowed dirs**:  
-[ALLOWED_DIRS_LIST]
+**Import hint**: `[IMPORT_HINT]`
 
 ---
 

@@ -6,6 +6,6 @@
  */
 
 export { AppLayout } from "./AppLayout";
-export { DashboardRoute, GoalsRoute } from "./routes";
+export { DashboardRoute, GoalsRoute, MilestonesRoute, ProjectsRoute, TasksRoute } from "./routes";
 
 export type { AppLayoutProps } from "@/contracts/app-shell";

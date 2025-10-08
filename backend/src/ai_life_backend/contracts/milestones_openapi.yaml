@@ -1,0 +1,759 @@
+openapi: 3.1.0
+info:
+  title: AI Life OS API
+  description: Goals Management MVP - Backend API
+  version: 0.1.0
+  license:
+    name: Proprietary (internal)
+paths:
+  /api/goals:
+    post:
+      tags:
+      - goals
+      - goals
+      summary: Create Goal
+      operationId: create_goal_api_goals_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalCreateRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      tags:
+      - goals
+      - goals
+      summary: List Goals
+      operationId: list_goals_api_goals_get
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - active
+            - done
+            type: string
+          - type: 'null'
+          title: Status
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalListResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /api/goals/{goal_id}:
+    get:
+      tags:
+      - goals
+      - goals
+      summary: Get Goal
+      operationId: get_goal_api_goals__goal_id__get
+      parameters:
+      - name: goal_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Goal Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    patch:
+      tags:
+      - goals
+      - goals
+      summary: Update Goal
+      description: "Update a goal's title and/or completion status.\n\nArgs:\n   \
+        \ goal_id (UUID): The unique identifier of the goal to update.\n    request\
+        \ (GoalUpdateRequest): The fields to update (title and/or is_done).\n    repo\
+        \ (PostgresGoalRepository): The repository instance for database operations.\n\
+        \nReturns:\n    GoalResponse: The updated goal.\n\nRaises:\n    HTTPException:\
+        \ If no fields are provided, or if the goal is not found, or if validation\n\
+        \    fails."
+      operationId: update_goal_api_goals__goal_id__patch
+      parameters:
+      - name: goal_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Goal Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - goals
+      - goals
+      summary: Delete Goal
+      description: 'Delete a goal by its ID.
+
+
+        Raises a 404 HTTPException if the goal is not found.'
+      operationId: delete_goal_api_goals__goal_id__delete
+      parameters:
+      - name: goal_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Goal Id
+      responses:
+        '204':
+          description: Successful Response
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /api/milestones:
+    get:
+      tags:
+      - milestones
+      - milestones
+      summary: List Milestones
+      description: "List all milestones.\n\nArgs:\n    repo: Milestone repository\n\
+        \nReturns:\n    List of all milestones"
+      operationId: list_milestones_api_milestones_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneListResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    post:
+      tags:
+      - milestones
+      - milestones
+      summary: Create Milestone
+      description: "Create a new milestone.\n\nArgs:\n    request: Milestone creation\
+        \ data\n    repo: Milestone repository\n\nReturns:\n    The created milestone\n\
+        \nRaises:\n    HTTPException: If validation fails (422)"
+      operationId: create_milestone_api_milestones_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MilestoneCreateRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /api/milestones/{milestone_id}:
+    get:
+      tags:
+      - milestones
+      - milestones
+      summary: Get Milestone
+      description: "Get a milestone by ID.\n\nArgs:\n    milestone_id: The milestone\
+        \ ID\n    repo: Milestone repository\n\nReturns:\n    The milestone\n\nRaises:\n\
+        \    HTTPException: If milestone not found (404)"
+      operationId: get_milestone_api_milestones__milestone_id__get
+      parameters:
+      - name: milestone_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Milestone Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    patch:
+      tags:
+      - milestones
+      - milestones
+      summary: Update Milestone
+      description: "Update a milestone.\n\nArgs:\n    milestone_id: The milestone\
+        \ ID\n    request: Fields to update\n    repo: Milestone repository\n\nReturns:\n\
+        \    The updated milestone\n\nRaises:\n    HTTPException: If no fields provided\
+        \ (422), if milestone not found (404),\n                  or if validation\
+        \ fails (422)"
+      operationId: update_milestone_api_milestones__milestone_id__patch
+      parameters:
+      - name: milestone_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Milestone Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MilestoneUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags:
+      - milestones
+      - milestones
+      summary: Delete Milestone
+      description: "Delete a milestone.\n\nArgs:\n    milestone_id: The milestone\
+        \ ID\n    repo: Milestone repository\n\nRaises:\n    HTTPException: If milestone\
+        \ not found (404)"
+      operationId: delete_milestone_api_milestones__milestone_id__delete
+      parameters:
+      - name: milestone_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Milestone Id
+      responses:
+        '204':
+          description: Successful Response
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /health:
+    get:
+      tags:
+      - health
+      summary: Health Check
+      description: Health check endpoint.
+      operationId: health_check_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Check Health Get
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  schemas:
+    GoalCreateRequest:
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Title
+      type: object
+      required:
+      - title
+      title: GoalCreateRequest
+      description: Request schema for creating a goal.
+    GoalListResponse:
+      properties:
+        goals:
+          items:
+            $ref: '#/components/schemas/GoalResponse'
+          type: array
+          title: Goals
+      type: object
+      required:
+      - goals
+      title: GoalListResponse
+      description: Response schema for list of goals.
+    GoalResponse:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        title:
+          type: string
+          title: Title
+        is_done:
+          type: boolean
+          title: Is Done
+        date_created:
+          type: string
+          format: date-time
+          title: Date Created
+        date_updated:
+          type: string
+          format: date-time
+          title: Date Updated
+      type: object
+      required:
+      - id
+      - title
+      - is_done
+      - date_created
+      - date_updated
+      title: GoalResponse
+      description: Response schema for a goal.
+    GoalUpdateRequest:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 255
+            minLength: 1
+          - type: 'null'
+          title: Title
+        is_done:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Done
+      type: object
+      title: GoalUpdateRequest
+      description: Request schema for updating a goal.
+    MilestoneCreateRequest:
+      properties:
+        goal_id:
+          type: string
+          format: uuid
+          title: Goal Id
+        title:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Title
+        due:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Due
+        status:
+          type: string
+          enum:
+          - todo
+          - doing
+          - done
+          - blocked
+          title: Status
+          default: todo
+        demo_criterion:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Demo Criterion
+        blocking:
+          type: boolean
+          title: Blocking
+          default: false
+      type: object
+      required:
+      - goal_id
+      - title
+      - demo_criterion
+      title: MilestoneCreateRequest
+      description: Request schema for creating a milestone.
+    MilestoneListResponse:
+      properties:
+        milestones:
+          items:
+            $ref: '#/components/schemas/MilestoneResponse'
+          type: array
+          title: Milestones
+      type: object
+      required:
+      - milestones
+      title: MilestoneListResponse
+      description: Response schema for list of milestones.
+    MilestoneResponse:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        goal_id:
+          type: string
+          format: uuid
+          title: Goal Id
+        title:
+          type: string
+          title: Title
+        due:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Due
+        status:
+          type: string
+          title: Status
+        demo_criterion:
+          type: string
+          title: Demo Criterion
+        blocking:
+          type: boolean
+          title: Blocking
+        date_created:
+          type: string
+          format: date-time
+          title: Date Created
+        date_updated:
+          type: string
+          format: date-time
+          title: Date Updated
+      type: object
+      required:
+      - id
+      - goal_id
+      - title
+      - due
+      - status
+      - demo_criterion
+      - blocking
+      - date_created
+      - date_updated
+      title: MilestoneResponse
+      description: Response schema for a milestone.
+    MilestoneUpdateRequest:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 255
+            minLength: 1
+          - type: 'null'
+          title: Title
+        due:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Due
+        status:
+          anyOf:
+          - type: string
+            enum:
+            - todo
+            - doing
+            - done
+            - blocked
+          - type: 'null'
+          title: Status
+        demo_criterion:
+          anyOf:
+          - type: string
+            maxLength: 255
+            minLength: 1
+          - type: 'null'
+          title: Demo Criterion
+        blocking:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Blocking
+      type: object
+      title: MilestoneUpdateRequest
+      description: Request schema for updating a milestone.
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+      required:
+      - title
+      - status
+      additionalProperties: true
+servers:
+- url: http://localhost:8000
+  description: Local dev
+security: []
+tags:
+- name: goals
+  description: Goals management endpoints
+- name: milestones
+  description: Milestones management endpoints
+- name: health
+  description: Health checks

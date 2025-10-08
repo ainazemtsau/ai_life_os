@@ -170,7 +170,6 @@ frontend/src/contracts/
 ## Module Compliance
 
 ✅ **Registry Validation**: Contract exists and type checking passes
-✅ **Module Boundaries**: All files in allowed_dirs
 ✅ **Dependency Rules**: Only uses frontend.design and backend.goals (HTTP)
 ✅ **Public API**: Clean barrel exports via index.ts
 ✅ **Contract**: TypeScript definitions in contracts/goals.d.ts

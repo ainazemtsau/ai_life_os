@@ -1,0 +1,51 @@
+{
+  "feature": "003-goal-projects-tasks-mvp",
+  "updated_at": "2025-10-07T17:30:00Z",
+  "modules": {
+    "frontend.milestones": {
+      "status": "verified",
+      "last_run": "2025-10-07T17:45:00Z",
+      "done_ids": ["MT001", "MT002", "MT003", "MT004", "MT005"],
+      "totals": {
+        "global": {
+          "done": 4,
+          "total": 4
+        },
+        "module": {
+          "done": 5,
+          "total": 5
+        }
+      }
+    },
+    "frontend.projects": {
+      "status": "verified",
+      "last_run": "2025-10-07T17:15:00Z",
+      "done_ids": ["MT001", "MT002", "MT003", "MT004", "MT005"],
+      "totals": {
+        "global": {
+          "done": 8,
+          "total": 8
+        },
+        "module": {
+          "done": 5,
+          "total": 5
+        }
+      }
+    },
+    "frontend.app-shell": {
+      "status": "completed",
+      "last_run": "2025-10-07T17:30:00Z",
+      "done_ids": ["T017", "T018"],
+      "totals": {
+        "global": {
+          "done": 10,
+          "total": 10
+        },
+        "module": {
+          "done": 2,
+          "total": 2
+        }
+      }
+    }
+  }
+}

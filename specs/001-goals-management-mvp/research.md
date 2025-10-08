@@ -175,12 +175,6 @@ backend.goals:
   manifest: "specs/001-goals-management-mvp/contracts/backend.goals.api.md"
   contract: "specs/001-goals-management-mvp/contracts/openapi.yaml"
   import_hint: "from ai_life_backend.api.goals import router"
-  allowed_dirs:
-    - "backend/src/ai_life_backend/domain/goal.py"
-    - "backend/src/ai_life_backend/repository/goal_repository.py"
-    - "backend/src/ai_life_backend/services/goal_service.py"
-    - "backend/src/ai_life_backend/api/goals.py"
-    - "backend/tests/contract/test_goals_api.py"
   uses: []
 
 frontend.goals:
@@ -189,10 +183,6 @@ frontend.goals:
   manifest: "specs/001-goals-management-mvp/contracts/frontend.goals.api.md"
   contract: "specs/001-goals-management-mvp/contracts/goals.d.ts"
   import_hint: "import { GoalList, GoalForm } from '@/components/goals'"
-  allowed_dirs:
-    - "frontend/src/components/goals/**"
-    - "frontend/src/lib/api/goals.ts"
-    - "frontend/src/types/goal.ts"
   uses: ["backend.goals"]
 ```
 

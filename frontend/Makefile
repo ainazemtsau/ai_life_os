@@ -1,23 +1,36 @@
+# не эхо-ить сами команды make
+.SILENT: fmt fix lint typecheck test qa ci
+
+PNPM = pnpm --silent
+SUCCESS_MSG ?= ✅ всё ок
+
 fmt:
-	pnpm run format
+	$(PNPM) run format >/dev/null  # прячем обычный вывод, оставляем только stderr
 
 fix:
-	pnpm run lint:fix
+	$(PNPM) run lint:fix
 
 lint:
-	pnpm run lint
+	$(PNPM) run lint
 
 typecheck:
-	pnpm run typecheck
+	$(PNPM) run typecheck
+
+test:
+	$(PNPM) run test
 
 qa:
-	pnpm run format
-	pnpm run lint:fix
-	pnpm run lint
-	pnpm run typecheck
-	pnpm run test
+	@set -e; \
+	$(PNPM) run format >/dev/null; \
+	$(PNPM) run lint:fix; \
+	$(PNPM) run lint; \
+	$(PNPM) run typecheck; \
+	$(PNPM) run test; \
+	echo "$(SUCCESS_MSG)"
 
 ci:
-	pnpm run format:check
-	pnpm run lint
-	pnpm run typecheck
+	@set -e; \
+	$(PNPM) run format:check >/dev/null; \
+	$(PNPM) run lint; \
+	$(PNPM) run typecheck; \
+	echo "$(SUCCESS_MSG)"

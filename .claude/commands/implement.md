@@ -39,7 +39,7 @@ Execute the implementation plan **for a single module** using its per-module tas
 
 ### 2) Load context (Registry-driven, NO deep-inspection)
 4. Read `.specify/memory/public/registry.yaml`:
-   - Find `<MODULE>` entry → read: `allowed_dirs`, `import_hint`, `uses`, `manifest`, `contract`, `semver`.
+   - Find `<MODULE>` entry → read: `import_hint`, `uses`, `manifest`, `contract`, `semver`.
    - For each module in `uses`, read **their** `manifest` and `contract` too.
 5. **Treat dependencies as opaque**:  
    - Use ONLY their MANIFEST + CONTRACT;  
@@ -50,7 +50,6 @@ Execute the implementation plan **for a single module** using its per-module tas
 ### 3) Execute per-module tasks (TDD-first, boundaries enforced)
 7. Parse `specs/<FEATURE>/tasks.by-module/<MODULE>-tasks.md`:
    - Identify phases, `[P]` markers (parallel-safe), explicit file paths, dependencies.
-   - Ensure all paths are **within `allowed_dirs`** for this module. If not → **STOP** and fix tasks file first.
 8. Execute by phases (Setup → Tests → Implementation → Integration → Polish):
    - **TDD**: tests must be authored to fail before implementation.
    - `[P]`: run in parallel only if tasks touch different files and have no deps.
@@ -82,7 +81,7 @@ Execute the implementation plan **for a single module** using its per-module tas
     - **STOP** editing foreign modules.
 
 ### 6) Safety rails
-- Never modify files outside `<MODULE>` `allowed_dirs`.
+- Never modify files outside `<MODULE>`.
 - Never import symbols from other modules except via their `import_hint`.
 - If the per-module task file lacks explicit paths or includes foreign paths → fix tasks first (do not guess).
 - Follow Clean Code & simplicity rules from constitution (SOLID, no magic values, small functions/files, DRY, KISS).

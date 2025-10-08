@@ -5,12 +5,19 @@ Version: 0.1.0
 Reusable UI components/tokens for all features.
 
 ## Public surface (imports)
-- Components: `Button`, `Dialog`, `Input`, `Label`, `Card`, `Badge`
+- Components: `Button`, `Dialog`, `Input`, `Label`, `Card`, `Badge`, `DataTable`
 - Utility: `cn`
 
 ## Usage
 ```ts
-import { Button, Input } from '@/features/design';
+import { Button, DataTable } from '@/features/design';
+
+const columns = [
+  { id: "name", header: "Name" },
+  { id: "status", header: "Status" },
+];
+
+<DataTable data={rows} columns={columns} />;
 ```
 
 Rules
