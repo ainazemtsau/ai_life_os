@@ -119,7 +119,7 @@
 
 ---
 
-### T009 @prio(P1) @module(frontend.milestones) Define Milestones contract (TypeScript)
+### T009 @prio(P1) @module(frontend.milestones) Define Milestones contract (TypeScript) [x] (done: 2025-10-07)
 **Description**: Create `frontend/src/contracts/milestones.d.ts` with public components/hooks types: `MilestonesList`, `MilestoneForm`, `useMilestones`, `useCreateMilestone`, `useUpdateMilestone`, `useDeleteMilestone`.
 
 **DoD**:
@@ -130,7 +130,7 @@
 
 ---
 
-### T010 @prio(P1) @module(frontend.milestones) Write tests for Milestones UI components and hooks
+### T010 @prio(P1) @module(frontend.milestones) Write tests for Milestones UI components and hooks [x] (done: 2025-10-07)
 **Description**: Write React Testing Library tests for `MilestonesList`, `MilestoneForm`, API hooks. Test Goal selector dropdown, status dropdown, delete confirmation, error handling (RFC 7807).
 
 **DoD**:
@@ -141,7 +141,7 @@
 
 ---
 
-### T011 @prio(P1) @module(frontend.milestones) Implement Milestones UI (list + forms)
+### T011 @prio(P1) @module(frontend.milestones) Implement Milestones UI (list + forms) [x] (done: 2025-10-07)
 **Description**: Implement `MilestonesList` component (list page), `MilestoneForm` component (create/edit modal/page), API client hooks using `useSWR` or similar. Use `frontend.design` components. Integrate Goal selector from `frontend.goals`.
 
 **DoD**:
@@ -154,7 +154,7 @@
 
 ---
 
-### T012 @prio(P1) @module(frontend.milestones) Update manifest and bump SemVer
+### T012 @prio(P1) @module(frontend.milestones) Update manifest and bump SemVer [x] (done: 2025-10-07)
 **Description**: Update `docs/public/frontend.milestones.api.md` with components, hooks, usage examples. Bump SemVer. Validate manifest.
 
 **DoD**:
@@ -165,7 +165,9 @@
 
 ---
 
-### T013 @prio(P1) @module(frontend.projects) Define Projects/Tasks contract (TypeScript)
+---
+
+### T013 @prio(P1) @module(frontend.projects) Define Projects/Tasks contract (TypeScript) [x] (done: 2025-10-07)
 **Description**: Create `frontend/src/contracts/projects.d.ts` with public types: `ProjectsList`, `ProjectForm`, `TasksList`, `TaskForm`, `DependencySelector`, hooks (`useProjects`, `useTasks`, `useCreateProject`, `useUpdateProject`, `useDeleteProject`, `useCreateTask`, `useUpdateTask`, `useDeleteTask`).
 
 **DoD**:
@@ -176,7 +178,7 @@
 
 ---
 
-### T014 @prio(P1) @module(frontend.projects) Write tests for Projects/Tasks UI components and hooks
+### T014 @prio(P1) @module(frontend.projects) Write tests for Projects/Tasks UI components and hooks [x] (done: 2025-10-07)
 **Description**: Write tests for lists, forms, dependency selectors (Project→Project, Task→Task), all enum dropdowns (7 Task enums), delete confirmation, cycle detection error handling.
 
 **DoD**:
@@ -189,7 +191,7 @@
 
 ---
 
-### T015 @prio(P1) @module(frontend.projects) Implement Projects/Tasks UI (lists + forms + dependency selectors)
+### T015 @prio(P1) @module(frontend.projects) Implement Projects/Tasks UI (lists + forms + dependency selectors) [x] (done: 2025-10-07)
 **Description**: Implement `ProjectsList`, `ProjectForm`, `TasksList`, `TaskForm`, `DependencySelector` components. Implement API hooks. Use frontend.design components. Integrate Goal selector for Projects. Implement Task/Project dependency dropdowns with DAG validation feedback.
 
 **DoD**:
@@ -203,7 +205,7 @@
 
 ---
 
-### T016 @prio(P1) @module(frontend.projects) Update manifest and bump SemVer
+### T016 @prio(P1) @module(frontend.projects) Update manifest and bump SemVer [x] (done: 2025-10-07)
 **Description**: Update `docs/public/frontend.projects.api.md` with components, hooks, usage. Bump SemVer. Validate manifest.
 
 **DoD**:
@@ -214,7 +216,7 @@
 
 ---
 
-### T017 @prio(P1) @module(frontend.app-shell) Add routes for Milestones, Projects, Tasks
+### T017 @prio(P1) @module(frontend.app-shell) Add routes for Milestones, Projects, Tasks [x] (done: 2025-10-07)
 **Description**: Add Next.js App Router pages: `/milestones/page.tsx`, `/projects/page.tsx`, `/tasks/page.tsx`. Wire with feature module components. Add navigation links. Keep glue minimal (no business logic in `app/`).
 
 **DoD**:
@@ -226,7 +228,7 @@
 
 ---
 
-### T018 @prio(P1) @module(frontend.app-shell) Update manifest and bump SemVer
+### T018 @prio(P1) @module(frontend.app-shell) Update manifest and bump SemVer [x] (done: 2025-10-07)
 **Description**: Update `docs/public/frontend.app-shell.api.md` with new routes. Bump SemVer. Validate manifest.
 
 **DoD**:

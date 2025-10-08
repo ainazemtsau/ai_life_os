@@ -123,6 +123,51 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Badge: React.FC<BadgeProps>;
 
 /**
+ * DataTable component
+ */
+export type DataTableAlign = "left" | "center" | "right";
+
+export type DataTableAccessor<TData> = keyof TData | ((row: TData) => unknown);
+
+export interface DataTableColumnHeaderContext<TData> {
+  column: DataTableColumn<TData>;
+}
+
+export interface DataTableCellContext<TData> {
+  column: DataTableColumn<TData>;
+  row: TData;
+  rowIndex: number;
+  value: unknown;
+}
+
+export interface DataTableColumn<TData> {
+  id: string;
+  header: React.ReactNode | ((context: DataTableColumnHeaderContext<TData>) => React.ReactNode);
+  accessor?: DataTableAccessor<TData>;
+  cell?: (context: DataTableCellContext<TData>) => React.ReactNode;
+  align?: DataTableAlign;
+  className?: string;
+  headerClassName?: string;
+  width?: string | number;
+  minWidth?: string | number;
+}
+
+export interface DataTableProps<TData> {
+  data: TData[];
+  columns: DataTableColumn<TData>[];
+  emptyState?: React.ReactNode;
+  caption?: React.ReactNode;
+  toolbar?: React.ReactNode;
+  getRowId?: (row: TData, index: number) => string | number;
+  className?: string;
+  wrapperClassName?: string;
+  rowClassName?: string | ((row: TData, index: number) => string | undefined);
+  onRowClick?: (row: TData, index: number) => void;
+}
+
+export function DataTable<TData>(props: DataTableProps<TData>): React.ReactElement | null;
+
+/**
  * Utility: Class name merger
  * Combines clsx and tailwind-merge for optimized class names
  */

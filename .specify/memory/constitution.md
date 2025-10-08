@@ -91,6 +91,7 @@ A module is **READY** when:
   - In-process: exported symbols match manifest/Protocols/`*.d.ts`.
 - [ ] Manifest in `docs/public/` is up to date (Exports/Types/Usage/Changelog).
 - [ ] **SemVer** bumped appropriately; Conventional Commit prepared.
+- [ ] Frontend modules only ship behaviorally meaningful tests (skip pure UI rendering assertions unless part of integration/e2e coverage).
 
 ---
 

@@ -50,14 +50,16 @@ modules:
 
   frontend.app-shell:
     kind: typescript
-    semver: 0.1.0
+    semver: 0.2.0
     manifest: docs/public/frontend.app-shell.api.md
     contract: frontend/src/contracts/app-shell.d.ts
     import_hint: import * as appShell from '@/features/app-shell'
     uses:
       - frontend.dashboard
       - frontend.goals
-    notes: "App shell and routing module. Owns Next.js App Router glue (frontend/src/app/**)."
+      - frontend.milestones
+      - frontend.projects
+    notes: "App shell and routing module. Owns Next.js App Router glue (frontend/src/app/**). Routes for dashboard, goals, milestones, projects, tasks."
 
   backend.projects:
     kind: python
@@ -82,7 +84,7 @@ modules:
 
   frontend.projects:
     kind: typescript
-    semver: 0.1.0
+    semver: 0.2.0
     manifest: docs/public/frontend.projects.api.md
     contract: frontend/src/contracts/projects.d.ts
     import_hint: import * as projects from '@/features/projects'
@@ -93,7 +95,7 @@ modules:
 
   frontend.milestones:
     kind: typescript
-    semver: 0.1.0
+    semver: 0.2.0
     manifest: docs/public/frontend.milestones.api.md
     contract: frontend/src/contracts/milestones.d.ts
     import_hint: import * as milestones from '@/features/milestones'

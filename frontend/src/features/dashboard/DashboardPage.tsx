@@ -43,12 +43,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ className }) => {
                 <h3 className="mb-2 font-semibold">Available Features:</h3>
                 <ul className="list-inside list-disc space-y-1 text-muted-foreground">
                   <li>Goals Management - Track and organize your objectives</li>
+                  <li>Milestones Tracking - Define key achievement markers for your goals</li>
+                  <li>Projects Management - Organize work into structured projects</li>
+                  <li>Task Tracking - Break down projects into actionable tasks</li>
                 </ul>
               </div>
               <div>
                 <h3 className="mb-2 font-semibold">Upcoming Features:</h3>
                 <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-                  <li>Task Tracking - Break down goals into actionable tasks</li>
                   <li>Progress Analytics - Visualize your achievements</li>
                   <li>AI-Powered Insights - Get personalized recommendations</li>
                 </ul>
@@ -57,15 +59,32 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ className }) => {
           </design.CardContent>
         </design.Card>
 
-        {/* Navigation to Goals */}
+        {/* Navigation Links */}
         <design.Card>
           <design.CardHeader>
             <design.CardTitle>Quick Actions</design.CardTitle>
           </design.CardHeader>
           <design.CardContent>
-            <Link href="/goals">
-              <design.Button className="w-full sm:w-auto">Go to Goals</design.Button>
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/goals">
+                <design.Button className="w-full sm:w-auto">Go to Goals</design.Button>
+              </Link>
+              <Link href="/milestones">
+                <design.Button variant="outline" className="w-full sm:w-auto">
+                  Go to Milestones
+                </design.Button>
+              </Link>
+              <Link href="/projects">
+                <design.Button variant="outline" className="w-full sm:w-auto">
+                  Go to Projects
+                </design.Button>
+              </Link>
+              <Link href="/tasks">
+                <design.Button variant="outline" className="w-full sm:w-auto">
+                  Go to Tasks
+                </design.Button>
+              </Link>
+            </div>
           </design.CardContent>
         </design.Card>
       </div>

@@ -16,17 +16,22 @@ $ARGUMENTS
 Checks (adapt to your project)
 - boundaries: imports use only public surfaces (scan for deep imports)
 - docs: `.specify/scripts/registry_validate.py`, `.specify/scripts/manifest_lint.py`
-- frontend TS: `pnpm typecheck`
-- frontend lint: `pnpm lint`
+- **Quality Assurance**: `make qa` - runs all checks (typecheck, lint, format, tests)
+  - **CRITICAL**: ALL errors MUST be fixed by modifying code
+  - **FORBIDDEN**: Disabling rules with comments (eslint-disable, @ts-ignore, etc.)
+  - **FORBIDDEN**: Lowering quality standards or ignoring errors
+  - Only acceptable: warnings for form complexity in production code
 - backend tests (if python module): `pytest -q` (module-selective)
-- any module-local tests defined in playbook
 
 Steps
 1) Discover feature context
    - `.specify/scripts/bash/setup-plan.sh --json` → parse `FEATURE_SPEC`, `IMPL_PLAN`, `SPECS_DIR`, `BRANCH`.
 2) Validate module `<id>` belongs to TARGET_MODULES (from plan.md).
-3) Run verifications (only for this module’s paths)
-   - If any check fails → collect brief error summary.
+3) Run verifications (only for this module's paths)
+   - Run `make qa` to check formatting, linting, types, and tests
+   - **If ANY error found**: FIX the code, NEVER disable checks or add ignore comments
+   - Re-run `make qa` until ALL errors are resolved (0 errors)
+   - If any check fails after fixes → module stays blocked
 4) Update PROGRESS
    - If all checks PASS:
      * In `specs/<feature>/tasks.md`: mark the line “Verify <module> module” for this module as `- [x] ... (done: YYYY-MM-DD)`, if present.
