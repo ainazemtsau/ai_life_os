@@ -63,9 +63,6 @@ We support two kinds of public interfaces:
 **Sequence (default):**
 1. `/specify` → create `spec.md` (WHAT, not HOW).
 2. `/clarify` → up to 5 targeted questions; record answers into spec.
-3. *(optional)* `/research-brief` → short fact pack; no code.
-4. *(as needed)* `/design-spike` → explore approaches (trade-offs).
-5. *(as needed)* `/adr` → decide & record the chosen option.
 6. `/plan` (thin) → scope, **no hardcoded modules**, link ADR/spike; re-use registry.
 7. `/tasks` → generate `tasks.md` + `tasks.by-module/*.md` (playbooks with DoD).
 8. `/fanout-tasks <feature-id>` → sync global → per-module **FANOUT** blocks.
